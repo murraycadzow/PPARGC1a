@@ -1,0 +1,215 @@
+---
+title: "T2DM association with HU"
+author: "Murray Cadzow"
+date: "20/10/2014"
+classoption: landscape
+output: pdf_document
+---
+
+
+```{r, echo=FALSE}
+library(knitr)
+library(xtable)
+library(pander)
+# Murray Cadzow
+# May 2014
+setwd("../Dec2014/T2DM/")
+merged_haploped_pheno_gt=read.csv("~/Documents/PPARGC1A//merged_haploped_pheno_gt.txt", header=TRUE, sep="\t")
+merged_haploped_pheno_gt$DOM_c =ifelse( merged_haploped_pheno_gt$RS8192678_CC1_CT2_TT3 ==1 | 
+                                          merged_haploped_pheno_gt$RS8192678_CC1_CT2_TT3 ==2 , 1, 0)
+merged_haploped_pheno_gt$DOM_t =ifelse( merged_haploped_pheno_gt$RS8192678_CC1_CT2_TT3 ==3 | 
+                                          merged_haploped_pheno_gt$RS8192678_CC1_CT2_TT3 ==2 , 1, 0)
+merged_haploped_pheno_gt$het_adv =ifelse( merged_haploped_pheno_gt$RS8192678_CC1_CT2_TT3 ==2 , 1, 0)
+
+nzm=subset(merged_haploped_pheno_gt, merged_haploped_pheno_gt$ETHNICITY=="1.0 NZ Maori" & (FULLEPGTAFF == 2 | SURICACID > 0.42))
+
+
+samoan=subset(merged_haploped_pheno_gt, merged_haploped_pheno_gt$ETHNICITY=="1.0 Samoan" & (FULLWPGTAFF == 2 | SURICACID > 0.42))
+
+
+tongan=subset(merged_haploped_pheno_gt, merged_haploped_pheno_gt$ETHNICITY=="1.0 Tongan" & (FULLWPGTAFF == 2 | SURICACID > 0.42))
+
+
+cim=subset(merged_haploped_pheno_gt, merged_haploped_pheno_gt$ETHNICITY=="1.0 CI Maori" & (FULLEPGTAFF == 2 | SURICACID > 0.42))
+
+
+poly= rbind(nzm, cim, samoan, tongan)
+
+merged_haploped_pheno_gt$ETHNICITY[merged_haploped_pheno_gt$ETHNICITY == "1.0 Caucasain"] = "1.0 Caucasian"
+
+##CAU groups
+CAU=subset(merged_haploped_pheno_gt,  merged_haploped_pheno_gt$FULLCAUGTAFF==2 | SURICACID > 0.42)
+
+```
+
+
+
+```{r}
+
+#################################################
+## regressions ADDITIVE MODEL ##################
+##############################################
+
+cau_glm_additive=glm(as.factor(CAU$DIABETES) ~ as.factor(CAU$FULLCAUGTAFF)+CAU$BMI + CAU$AGECOL + 
+                       as.factor(CAU$SEX.x) +  CAU$RS8192678_CC1_CT2_TT3, family="binomial")
+
+nzm_glm_additive=glm( as.factor(nzm$DIABETES) ~ as.factor(nzm$FULLEPGTAFF) +nzm$BMI+ nzm$AGECOL + 
+                        as.factor(nzm$SEX.x) + nzm$STANCESTRY+ nzm$RS8192678_CC1_CT2_TT3, family="binomial")
+
+cim_glm_additive=glm(as.factor(cim$DIABETES)  ~ as.factor(cim$FULLEPGTAFF)+cim$BMI + cim$AGECOL + 
+                       as.factor(cim$SEX.x) + cim$STANCESTRY+ cim$RS8192678_CC1_CT2_TT3, family="binomial")
+
+samoan_glm_additive=glm(as.factor(samoan$DIABETES) ~ as.factor(samoan$FULLWPGTAFF) +samoan$BMI+ samoan$AGECOL + 
+                          as.factor(samoan$SEX.x) + samoan$STANCESTRY+ samoan$RS8192678_CC1_CT2_TT3, family="binomial")
+
+tongan_glm_additive=glm(as.factor(tongan$DIABETES)  ~ as.factor(tongan$FULLWPGTAFF)+ tongan$BMI+ tongan$AGECOL + 
+                          as.factor(tongan$SEX.x) + tongan$STANCESTRY+ tongan$RS8192678_CC1_CT2_TT3, family="binomial")
+
+poly_glm_additive=glm(as.factor(poly$DIABETES)  ~ as.factor(poly$FULLWPGTAFF)+ poly$BMI+ poly$AGECOL + 
+                        as.factor(poly$SEX.x) + poly$STANCESTRY+ poly$RS8192678_CC1_CT2_TT3, family="binomial")
+
+
+cau_add=round(cbind(exp(cbind(OR= coef(cau_glm_additive), confint(cau_glm_additive))),
+                    Pvalue= summary(cau_glm_additive)$coefficients[,4]),3)
+nzm_add=round(cbind(exp(cbind(OR=coef(nzm_glm_additive), confint(nzm_glm_additive))), 
+                    Pvalue=summary(nzm_glm_additive)$coefficients[,4]), 3)
+cim_add=round(cbind(exp(cbind(OR=coef(cim_glm_additive), confint(cim_glm_additive))), 
+                    Pvalue=summary(cim_glm_additive)$coefficients[,4]), 3)
+samoan_add=round(cbind(exp(cbind(OR=coef(samoan_glm_additive), confint(samoan_glm_additive))), 
+                       Pvalue=summary(samoan_glm_additive)$coefficients[,4]),3)
+tongan_add=round(cbind(exp(cbind(OR=coef(tongan_glm_additive), confint(tongan_glm_additive))), 
+                       Pvalue=summary(tongan_glm_additive)$coefficients[,4]),3)
+poly_add=round(cbind(exp(cbind(OR=coef(poly_glm_additive), confint(poly_glm_additive))), 
+                     Pvalue=summary(poly_glm_additive)$coefficients[,4]),3)
+
+
+```
+
+## DOMINANT CC
+
+```{r}
+
+#################################################
+## regressions DOMINANT CC MODEL ###############
+##############################################
+cau_glm_domc=glm(as.factor(CAU$DIABETES) ~ as.factor(CAU$FULLCAUGTAFF)+CAU$BMI + CAU$AGECOL + 
+                   as.factor(CAU$SEX.x) +  CAU$DOM_c, family="binomial")
+
+nzm_glm_domc=glm( as.factor(nzm$DIABETES) ~ as.factor(nzm$FULLEPGTAFF) +nzm$BMI+ nzm$AGECOL + 
+                    as.factor(nzm$SEX.x) + nzm$STANCESTRY+ nzm$DOM_c, family="binomial")
+
+cim_glm_domc=glm(as.factor(cim$DIABETES)  ~ as.factor(cim$FULLEPGTAFF)+cim$BMI + cim$AGECOL + 
+                   as.factor(cim$SEX.x) + cim$STANCESTRY+ cim$DOM_c, family="binomial")
+
+samoan_glm_domc=glm(as.factor(samoan$DIABETES) ~ as.factor(samoan$FULLWPGTAFF) +samoan$BMI+ samoan$AGECOL + as.factor(samoan$SEX.x) + samoan$STANCESTRY+ samoan$DOM_c, family="binomial")
+
+tongan_glm_domc=glm(as.factor(tongan$DIABETES)  ~ as.factor(tongan$FULLWPGTAFF)+ tongan$BMI+ tongan$AGECOL + as.factor(tongan$SEX.x) + tongan$STANCESTRY+ tongan$DOM_c, family="binomial")
+
+poly_glm_domc=glm(as.factor(poly$DIABETES)  ~ as.factor(poly$FULLWPGTAFF)+ poly$BMI+ poly$AGECOL + as.factor(poly$SEX.x) + poly$STANCESTRY+ poly$DOM_c, family="binomial")
+
+cau_domcc=round(cbind(exp(cbind(OR= coef(cau_glm_domc), confint(cau_glm_domc))),Pvalue= summary(cau_glm_domc)$coefficients[,4]),3)
+nzm_domcc=round(cbind(exp(cbind(OR=coef(nzm_glm_domc), confint(nzm_glm_domc))), Pvalue=summary(nzm_glm_domc)$coefficients[,4]), 3)
+cim_domcc=round(cbind(exp(cbind(OR=coef(cim_glm_domc), confint(cim_glm_domc))), Pvalue=summary(cim_glm_domc)$coefficients[,4]), 3)
+samoan_domcc=round(cbind(exp(cbind(OR=coef(samoan_glm_domc), confint(samoan_glm_domc))), Pvalue=summary(samoan_glm_domc)$coefficients[,4]),3)
+tongan_domcc=round(cbind(exp(cbind(OR=coef(tongan_glm_domc), confint(tongan_glm_domc))), Pvalue=summary(tongan_glm_domc)$coefficients[,4]),3)
+poly_domcc=round(cbind(exp(cbind(OR=coef(poly_glm_domc), confint(poly_glm_domc))), Pvalue=summary(poly_glm_domc)$coefficients[,4]),3)
+
+```
+
+## Dominant TT
+
+```{r}
+
+#################################################
+## regressions DOMINANT TT MODEL ###############
+##############################################
+cau_glm_domt=glm(as.factor(CAU$DIABETES) ~ as.factor(CAU$FULLCAUGTAFF)+CAU$BMI + CAU$AGECOL + as.factor(CAU$SEX.x) +  CAU$DOM_t, family="binomial")
+
+nzm_glm_domt=glm( as.factor(nzm$DIABETES) ~ as.factor(nzm$FULLEPGTAFF) +nzm$BMI+ nzm$AGECOL + as.factor(nzm$SEX.x) + nzm$STANCESTRY+ nzm$DOM_t, family="binomial")
+
+cim_glm_domt=glm(as.factor(cim$DIABETES)  ~ as.factor(cim$FULLEPGTAFF)+cim$BMI + cim$AGECOL + as.factor(cim$SEX.x) + cim$STANCESTRY+ cim$DOM_t, family="binomial")
+
+samoan_glm_domt=glm(as.factor(samoan$DIABETES) ~ as.factor(samoan$FULLWPGTAFF) +samoan$BMI+ samoan$AGECOL + as.factor(samoan$SEX.x) + samoan$STANCESTRY+ samoan$DOM_t, family="binomial")
+
+tongan_glm_domt=glm(as.factor(tongan$DIABETES)  ~ as.factor(tongan$FULLWPGTAFF)+ tongan$BMI+ tongan$AGECOL + as.factor(tongan$SEX.x) + tongan$STANCESTRY+ tongan$DOM_t, family="binomial")
+
+poly_glm_domt=glm(as.factor(poly$DIABETES)  ~ as.factor(poly$FULLWPGTAFF)+ poly$BMI+ poly$AGECOL + as.factor(poly$SEX.x) + poly$STANCESTRY+ poly$DOM_t, family="binomial")
+
+
+cau_domtt=round(cbind(exp(cbind(OR= coef(cau_glm_domt), confint(cau_glm_domt))),Pvalue= summary(cau_glm_domt)$coefficients[,4]),3)
+nzm_domtt=round(cbind(exp(cbind(OR=coef(nzm_glm_domt), confint(nzm_glm_domt))), Pvalue=summary(nzm_glm_domt)$coefficients[,4]), 3)
+cim_domtt=round(cbind(exp(cbind(OR=coef(cim_glm_domt), confint(cim_glm_domt))), Pvalue=summary(cim_glm_domt)$coefficients[,4]), 3)
+samoan_domtt=round(cbind(exp(cbind(OR=coef(samoan_glm_domt), confint(samoan_glm_domt))), Pvalue=summary(samoan_glm_domt)$coefficients[,4]),3)
+tongan_domtt=round(cbind(exp(cbind(OR=coef(tongan_glm_domt), confint(tongan_glm_domt))), Pvalue=summary(tongan_glm_domt)$coefficients[,4]),3)
+poly_domtt=round(cbind(exp(cbind(OR=coef(poly_glm_domt), confint(poly_glm_domt))), Pvalue=summary(poly_glm_domt)$coefficients[,4]),3)
+```
+
+## HET Adv
+
+```{r}
+#################################################
+## regressions HET ADVANTAGE MODEL ###############
+##############################################
+cau_glm_het_adv=glm(as.factor(CAU$DIABETES) ~ as.factor(CAU$FULLCAUGTAFF)+CAU$BMI + CAU$AGECOL + as.factor(CAU$SEX.x) +  CAU$het_adv, family="binomial")
+
+nzm_glm_het_adv=glm( as.factor(nzm$DIABETES) ~ as.factor(nzm$FULLEPGTAFF) +nzm$BMI+ nzm$AGECOL + as.factor(nzm$SEX.x) + nzm$STANCESTRY+ nzm$het_adv, family="binomial")
+
+cim_glm_het_adv=glm(as.factor(cim$DIABETES)  ~ as.factor(cim$FULLEPGTAFF)+cim$BMI + cim$AGECOL + as.factor(cim$SEX.x) + cim$STANCESTRY+ cim$het_adv, family="binomial")
+
+samoan_glm_het_adv=glm(as.factor(samoan$DIABETES) ~ as.factor(samoan$FULLWPGTAFF) +samoan$BMI+ samoan$AGECOL + as.factor(samoan$SEX.x) + samoan$STANCESTRY+ samoan$het_adv, family="binomial")
+
+tongan_glm_het_adv=glm(as.factor(tongan$DIABETES)  ~ as.factor(tongan$FULLWPGTAFF)+ tongan$BMI+ tongan$AGECOL + as.factor(tongan$SEX.x) + tongan$STANCESTRY+ tongan$het_adv, family="binomial")
+
+poly_glm_het_adv=glm(as.factor(poly$DIABETES)  ~ as.factor(poly$FULLWPGTAFF)+ poly$BMI+ poly$AGECOL + as.factor(poly$SEX.x) + poly$STANCESTRY+ poly$het_adv, family="binomial")
+
+
+cau_het_adv=round(cbind(exp(cbind(OR= coef(cau_glm_het_adv), confint(cau_glm_het_adv))),Pvalue= summary(cau_glm_het_adv)$coefficients[,4]),3)
+nzm_het_adv=round(cbind(exp(cbind(OR=coef(nzm_glm_het_adv), confint(nzm_glm_het_adv))), Pvalue=summary(nzm_glm_het_adv)$coefficients[,4]), 3)
+cim_het_adv=round(cbind(exp(cbind(OR=coef(cim_glm_het_adv), confint(cim_glm_het_adv))), Pvalue=summary(cim_glm_het_adv)$coefficients[,4]), 3)
+samoan_het_adv=round(cbind(exp(cbind(OR=coef(samoan_glm_het_adv), confint(samoan_glm_het_adv))), Pvalue=summary(samoan_glm_het_adv)$coefficients[,4]),3)
+tongan_het_adv=round(cbind(exp(cbind(OR=coef(tongan_glm_het_adv), confint(tongan_glm_het_adv))), Pvalue=summary(tongan_glm_het_adv)$coefficients[,4]),3)
+poly_het_adv=round(cbind(exp(cbind(OR=coef(poly_glm_het_adv), confint(poly_glm_het_adv))), Pvalue=summary(poly_glm_het_adv)$coefficients[,4]),3)
+
+```
+
+```{r, results='asis', echo=FALSE}
+pandoc(xtable(
+data.frame(Population=c("Caucasian","New Zealand Maori", "Cook Island Maori", "Samoan", "Tongan", "Combined Polynesian"), 
+           Additive = c(paste0(cau_add[6,1], " (", cau_add[6,2],", ", cau_add[6,3], ")"), paste0(nzm_add[7,1], " (", nzm_add[7,2],", ", nzm_add[7,3], ")"), paste0(cim_add[7,1], " (", cim_add[7,2],", ", cim_add[7,3], ")"), paste0(samoan_add[7,1], " (", samoan_add[7,2],", ", samoan_add[7,3], ")") , paste0(tongan_add[7,1], " (", tongan_add[7,2],", ", tongan_add[7,3], ")"), paste0(poly_add[7,1], " (", poly_add[7,2],", ", poly_add[7,3], ")") ), 
+           Additive_P= c(cau_add[6,4], nzm_add[7,4], cim_add[7,4], samoan_add[7,4], tongan_add[7,4], poly_add[7,4]), 
+           
+           Dominant_CC = c(paste0(cau_domcc[6,1], " (", cau_domcc[6,2],", ", cau_domcc[6,3], ")"), paste0(nzm_domcc[7,1], " (", nzm_domcc[7,2],", ", nzm_domcc[7,3], ")"), paste0(cim_domcc[7,1], " (", cim_domcc[7,2],", ", cim_domcc[7,3], ")"), paste0(samoan_domcc[7,1], " (", samoan_domcc[7,2],", ", samoan_domcc[7,3], ")") , paste0(tongan_domcc[7,1], " (", tongan_domcc[7,2],", ", tongan_domcc[7,3], ")") ,paste0(poly_domcc[7,1], " (", poly_domcc[7,2],", ", poly_domcc[7,3], ")")), 
+           DominantCC_P= c(cau_domcc[6,4], nzm_domcc[7,4], cim_domcc[7,4], samoan_domcc[7,4], tongan_domcc[7,4], poly_domcc[7,4]), 
+           Dominant_TT = c(paste0(cau_domtt[6,1], " (", cau_domtt[6,2],", ", cau_domtt[6,3], ")"), paste0(nzm_domtt[7,1], " (", nzm_domtt[7,2],", ", nzm_domtt[7,3], ")"), paste0(cim_domtt[7,1], " (", cim_domtt[7,2],", ", cim_domtt[7,3], ")"), paste0(samoan_domtt[7,1], " (", samoan_domtt[7,2],", ", samoan_domtt[7,3], ")") , paste0(tongan_domtt[7,1], " (", tongan_domtt[7,2],", ", tongan_domtt[7,3], ")"), paste0(poly_domtt[7,1], " (", poly_domtt[7,2],", ", poly_domtt[7,3], ")") ), 
+           DominantTT_P= c(cau_domtt[6,4], nzm_domtt[7,4], cim_domtt[7,4], samoan_domtt[7,4], tongan_domtt[7,4], poly_domtt[7,4]), 
+           Het_Adv = c(paste0(cau_het_adv[6,1], " (", cau_het_adv[6,2],", ", cau_het_adv[6,3], ")"), paste0(nzm_het_adv[7,1], " (", nzm_het_adv[7,2],", ", nzm_het_adv[7,3], ")"), paste0(cim_het_adv[7,1], " (", cim_het_adv[7,2],", ", cim_het_adv[7,3], ")"), paste0(samoan_het_adv[7,1], " (", samoan_het_adv[7,2],", ", samoan_het_adv[7,3], ")") , paste0(tongan_het_adv[7,1], " (", tongan_het_adv[7,2],", ", tongan_het_adv[7,3], ")"), paste0(poly_het_adv[7,1], " (", poly_het_adv[7,2],", ", poly_het_adv[7,3], ")") ), Het_Adv_P= c(cau_het_adv[6,4], nzm_het_adv[7,4], cim_het_adv[7,4], samoan_het_adv[7,4], tongan_het_adv[7,4], poly_het_adv[7,4])
+           ), row.names=NULL),format = "markup",)
+
+```
+
+
+```{r, echo=FALSE}
+basic_info=function(x){
+  print("BMI")
+  print(summary(x$BMI))
+  print("AGECOL")
+  print(summary(x$AGECOL))
+  print("SEX")
+  print(table(x$SEX.x,exclude=NULL))
+  print("DIABETES")
+  print(table(x$DIABETES,exclude=NULL))
+  print("STANCESTRY")
+  print(summary(x$STANCESTRY))
+  print("RS8192678_CC1_CT2_TT3")
+  print(table(x$RS8192678_CC1_CT2_TT3,exclude=NULL))
+  print("FULLCAUGTAFF")
+  print(table(x$FULLCAUGTAFF, exclude=NULL))
+  print("FULLEPGTAFF")
+  print(table(x$FULLEPGTAFF, exclude=NULL))
+  print("FULLWPGTAFF")
+  print(table(x$FULLWPGTAFF, exclude=NULL))
+  print("FULLEPWPGTAFF")
+  print(table(x$FULLEPWPGTAFF, exclude=NULL))
+}
+
+```
