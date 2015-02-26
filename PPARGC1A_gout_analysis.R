@@ -1,0 +1,413 @@
+# Murray Cadzow
+# May 2014
+
+#merged_haploped_pheno_gt=read.csv("~/Documents/PPARGC1A//merged_haploped_pheno_gt.txt", header=TRUE, sep="\t")
+merged_haploped_pheno_gt=read.csv("~/Documents/PPARGC1A/Analysis/pheno_gt_ato_g.csv", header=TRUE, sep="\t")
+merged_haploped_pheno_gt$DOM_c =ifelse( merged_haploped_pheno_gt$RS8192678_CC1_CT2_TT3 ==1 | merged_haploped_pheno_gt$RS8192678_CC1_CT2_TT3 ==2 , 1, 0)
+merged_haploped_pheno_gt$DOM_t =ifelse( merged_haploped_pheno_gt$RS8192678_CC1_CT2_TT3 ==3 | merged_haploped_pheno_gt$RS8192678_CC1_CT2_TT3 ==2 , 1, 0)
+merged_haploped_pheno_gt$het_adv =ifelse( merged_haploped_pheno_gt$RS8192678_CC1_CT2_TT3 ==2 , 1, 0)
+
+cases=subset(merged_haploped_pheno_gt, merged_haploped_pheno_gt$GOUTAFFSTAT==2)
+controls=subset(merged_haploped_pheno_gt, merged_haploped_pheno_gt$GOUTAFFSTAT==1)
+nzm=subset(merged_haploped_pheno_gt, merged_haploped_pheno_gt$ETHNICITY=="1.0 NZ Maori")
+nzm_c=subset(nzm, nzm$FULLEPGTAFF==1)
+nzm_g=subset(nzm, nzm$FULLEPGTAFF==2)
+
+samoan=subset(merged_haploped_pheno_gt, merged_haploped_pheno_gt$ETHNICITY=="1.0 Samoan")
+samoan_g=subset(samoan, samoan$FULLWPGTAFF==2)
+samoan_c=subset(samoan, samoan$FULLWPGTAFF==1)
+
+tongan=subset(merged_haploped_pheno_gt, merged_haploped_pheno_gt$ETHNICITY=="1.0 Tongan")
+tongan_c=subset(tongan,tongan$FULLWPGTAFF==1)
+tongan_g=subset(tongan, tongan$FULLWPGTAFF==2)
+
+cim=subset(merged_haploped_pheno_gt, merged_haploped_pheno_gt$ETHNICITY=="1.0 CI Maori")
+cim_c=subset(cim, cim$FULLEPGTAFF==1)
+cim_g=subset(cim, cim$FULLEPGTAFF==2)
+
+merged_haploped_pheno_gt$ETHNICITY[merged_haploped_pheno_gt$ETHNICITY == "1.0 Caucasain"] = "1.0 Caucasian"
+
+##CAU groups
+CAU=subset(merged_haploped_pheno_gt, merged_haploped_pheno_gt$FULLCAUGTAFF==1 | merged_haploped_pheno_gt$FULLCAUGTAFF==2)
+CAU_g=subset(CAU, CAU$FULLCAUGTAFF==2)
+CAU_c=subset(CAU, CAU$FULLCAUGTAFF==1)
+
+## EP groups
+EP=subset(merged_haploped_pheno_gt, merged_haploped_pheno_gt$FULLEPGTAFF==1 | merged_haploped_pheno_gt$FULLEPGTAFF==2)
+
+EPN=subset(EP, EP$EPNEPZ==1)
+EPN_c=subset(EPN, EPN$FULLEPGTAFF==1)
+EPN_g=subset(EPN, EPN$FULLEPGTAFF==2)
+
+EPZ=subset(EP,EP$EPNEPZ==2)
+EPZ_c=subset(EPZ, EPZ$FULLEPGTAFF==1)
+EPZ_g=subset(EPZ, EPZ$FULLEPGTAFF==2)
+
+EPWP=subset(merged_haploped_pheno_gt, merged_haploped_pheno_gt$FULLEPWPGTAFF==1 | merged_haploped_pheno_gt$FULLEPWPGTAFF==2)
+EPWP_c=subset(EPWP, EPWP$FULLEPWPGTAFF==1)
+EPWP_g=subset(EPWP, EPWP$FULLEPWPGTAFF==2)
+
+## WP groups
+WP=subset(merged_haploped_pheno_gt, merged_haploped_pheno_gt$FULLWPGTAFF==1 | merged_haploped_pheno_gt$FULLWPGTAFF==2)
+WP_c=subset(WP, WP$FULLWPGTAFF==1)
+WP_g=subset(WP, WP$FULLWPGTAFF==2)
+
+
+CAU_mod=CAU
+CAU_mod$STANCESTRY=rep(0, length(CAU_mod[,1]))
+CAU_mod=CAU_mod[c("FULLCAUGTAFF", "DIABETES", "STANCESTRY", "SEX.x","AGECOL", "BMI", "RS8192678_CC1_CT2_TT3", "DOM_c","DOM_t", "het_adv")]
+colnames(CAU_mod) = c("FULLGTAFF", "DIABETES", "STANCESTRY", "SEX.x","AGECOL", "BMI", "RS8192678_CC1_CT2_TT3", "DOM_c","DOM_t", "het_adv")
+CAU_mod$POP=rep("CAU", length(CAU_mod[,1]))
+
+EPN_mod=EPN[c("FULLEPGTAFF", "DIABETES", "STANCESTRY", "SEX.x","AGECOL", "BMI", "RS8192678_CC1_CT2_TT3", "DOM_c","DOM_t", "het_adv")]
+colnames(EPN_mod) = c("FULLGTAFF", "DIABETES", "STANCESTRY", "SEX.x","AGECOL", "BMI", "RS8192678_CC1_CT2_TT3", "DOM_c","DOM_t", "het_adv")
+EPN_mod$POP = rep("EPN", length(EPN_mod[,1]))
+
+EPZ_mod=EPZ[c("FULLEPGTAFF", "DIABETES", "STANCESTRY", "SEX.x","AGECOL", "BMI", "RS8192678_CC1_CT2_TT3", "DOM_c","DOM_t", "het_adv")]
+colnames(EPZ_mod) = c("FULLGTAFF", "DIABETES", "STANCESTRY", "SEX.x","AGECOL", "BMI", "RS8192678_CC1_CT2_TT3", "DOM_c","DOM_t", "het_adv")
+EPZ_mod$POP = rep("EPZ", length(EPZ_mod[,1]))
+
+WP_mod=WP[c("FULLWPGTAFF", "DIABETES", "STANCESTRY", "SEX.x","AGECOL", "BMI", "RS8192678_CC1_CT2_TT3", "DOM_c","DOM_t", "het_adv")]
+colnames(WP_mod) = c("FULLGTAFF", "DIABETES", "STANCESTRY", "SEX.x","AGECOL", "BMI", "RS8192678_CC1_CT2_TT3", "DOM_c","DOM_t", "het_adv")
+WP_mod$POP = rep("WP", length(WP_mod[,1]))
+
+EPWP_mod= EPWP[c("FULLEPWPGTAFF", "DIABETES", "STANCESTRY", "SEX.x","AGECOL", "BMI", "RS8192678_CC1_CT2_TT3", "DOM_c","DOM_t", "het_adv")]
+colnames(EPWP_mod) = c("FULLGTAFF", "DIABETES", "STANCESTRY", "SEX.x","AGECOL", "BMI", "RS8192678_CC1_CT2_TT3", "DOM_c","DOM_t", "het_adv")
+EPWP_mod$POP = rep("EPWP", length(EPWP_mod[,1]))
+
+combined_all = rbind(CAU_mod, EPN_mod, EPZ_mod, WP_mod, EPWP_mod)
+combined_poly = rbind(EPN_mod, EPZ_mod, WP_mod, EPWP_mod)
+
+combined_poly_glm_additive = glm(as.factor(combined_poly$FULLGTAFF) ~ as.factor(combined_poly$DIABETES) + combined_poly$BMI + combined_poly$STANCESTRY +  as.factor(combined_poly$SEX.x) + combined_poly$AGECOL + as.factor(combined_poly$POP) * combined_poly$RS8192678_CC1_CT2_TT3, family="binomial")
+combined_poly_glm_domc = glm(as.factor(combined_poly$FULLGTAFF) ~ as.factor(combined_poly$DIABETES) + combined_poly$BMI + combined_poly$STANCESTRY +  as.factor(combined_poly$SEX.x) + combined_poly$AGECOL + as.factor(combined_poly$POP) * combined_poly$DOM_c, family="binomial")
+combined_poly_glm_domt = glm(as.factor(combined_poly$FULLGTAFF) ~ as.factor(combined_poly$DIABETES) + combined_poly$BMI + combined_poly$STANCESTRY +  as.factor(combined_poly$SEX.x) + combined_poly$AGECOL + as.factor(combined_poly$POP) * combined_poly$DOM_t, family="binomial")
+combined_poly_glm_het_adv = glm(as.factor(combined_poly$FULLGTAFF) ~ as.factor(combined_poly$DIABETES) + combined_poly$BMI + combined_poly$STANCESTRY +  as.factor(combined_poly$SEX.x) + combined_poly$AGECOL + as.factor(combined_poly$POP) * combined_poly$het_adv, family="binomial")
+
+# summary(combined_poly_glm_additive)
+# summary(combined_poly_glm_domc)
+# summary(combined_poly_glm_domt)
+# summary(combined_poly_glm_het_adv)
+
+
+combined_all_glm_additive = glm(as.factor(combined_all$FULLGTAFF) ~ as.factor(combined_all$DIABETES) + combined_all$BMI + combined_all$STANCESTRY +  as.factor(combined_all$SEX.x) + combined_all$AGECOL + as.factor(combined_all$POP) * combined_all$RS8192678_CC1_CT2_TT3, family="binomial")
+combined_all_glm_domc = glm(as.factor(combined_all$FULLGTAFF) ~ as.factor(combined_all$DIABETES) + combined_all$BMI + combined_all$STANCESTRY +  as.factor(combined_all$SEX.x) + combined_all$AGECOL + as.factor(combined_all$POP) * combined_all$DOM_c, family="binomial")
+combined_all_glm_domt = glm(as.factor(combined_all$FULLGTAFF) ~ as.factor(combined_all$DIABETES) + combined_all$BMI + combined_all$STANCESTRY +  as.factor(combined_all$SEX.x) + combined_all$AGECOL + as.factor(combined_all$POP) * combined_all$DOM_t, family="binomial")
+combined_all_glm_het_adv = glm(as.factor(combined_all$FULLGTAFF) ~ as.factor(combined_all$DIABETES) + combined_all$BMI + combined_all$STANCESTRY +  as.factor(combined_all$SEX.x) + combined_all$AGECOL + as.factor(combined_all$POP) * combined_all$het_adv, family="binomial")
+
+# summary(combined_all_glm_additive)
+# summary(combined_all_glm_domc)
+# summary(combined_all_glm_domt)
+# summary(combined_all_glm_het_adv)
+
+
+
+#################################################
+## regressions ADDITIVE MODEL ##################
+##############################################
+cau_glm_additive=glm(as.factor(CAU$FULLCAUGTAFF) ~CAU$BMI + CAU$AGECOL + as.factor(CAU$SEX.x) + as.factor(CAU$DIABETES)  + CAU$RS8192678_CC1_CT2_TT3, family="binomial")
+wp_glm_additive=glm(as.factor(WP$FULLWPGTAFF) ~WP$BMI+ WP$AGECOL + as.factor(WP$SEX.x) + as.factor(WP$DIABETES) +WP$STANCESTRY+ WP$RS8192678_CC1_CT2_TT3, family="binomial")
+epn_glm_additive=glm(as.factor(EPN$FULLEPGTAFF)~ EPN$BMI + EPN$AGECOL + as.factor(EPN$SEX.x) + as.factor(EPN$DIABETES) +EPN$STANCESTRY + EPN$RS8192678_CC1_CT2_TT3, family="binomial")
+epz_glm_additive=glm(as.factor(EPZ$FULLEPGTAFF)~EPZ$BMI + EPZ$AGECOL + as.factor(EPZ$SEX.x) + as.factor(EPZ$DIABETES) +EPZ$STANCESTRY + EPZ$RS8192678_CC1_CT2_TT3, family="binomial")
+epwp_glm_additive=glm(as.factor(EPWP$FULLEPWPGTAFF)~EPWP$BMI + EPWP$AGECOL + as.factor(EPWP$SEX.x) + as.factor(EPWP$DIABETES) +EPWP$STANCESTRY + EPWP$RS8192678_CC1_CT2_TT3, family="binomial")
+nzm_glm_additive=glm(as.factor(nzm$FULLEPGTAFF) ~ nzm$BMI+ nzm$AGECOL + as.factor(nzm$SEX.x) + as.factor(nzm$DIABETES) +nzm$STANCESTRY+ nzm$RS8192678_CC1_CT2_TT3, family="binomial")
+cim_glm_additive=glm(as.factor(cim$FULLEPGTAFF)~cim$BMI + cim$AGECOL + as.factor(cim$SEX.x) + as.factor(cim$DIABETES) +cim$STANCESTRY+ cim$RS8192678_CC1_CT2_TT3, family="binomial")
+samoan_glm_additive=glm(as.factor(samoan$FULLWPGTAFF)~ samoan$BMI+ samoan$AGECOL + as.factor(samoan$SEX.x) + as.factor(samoan$DIABETES) +samoan$STANCESTRY+ samoan$RS8192678_CC1_CT2_TT3, family="binomial")
+tongan_glm_additive=glm(as.factor(tongan$FULLWPGTAFF) ~tongan$BMI+ tongan$AGECOL + as.factor(tongan$SEX.x) + as.factor(tongan$DIABETES) +tongan$STANCESTRY+ tongan$RS8192678_CC1_CT2_TT3, family="binomial")
+
+
+sink(file="gout_additive_model_OR.txt")
+# summary(cau_glm_additive)
+# # summary(epn_glm_additive)
+# # summary(epz_glm_additive)
+# # summary(wp_glm_additive)
+# # summary(epwp_glm_additive)
+# summary(nzm_glm_additive)
+# summary(cim_glm_additive)
+# summary(samoan_glm_additive)
+# summary(tongan_glm_additive)
+# summary(combined_poly_glm_additive)
+# cummary(combined_all_glm_additive)
+round(cbind(exp(cbind(OR= coef(cau_glm_additive), confint(cau_glm_additive))),Pvalue= summary(cau_glm_additive)$coefficients[,4]),3)
+# confint(epn_glm_additive)
+# confint(epz_glm_additive)
+# confint(wp_glm_additive)
+# confint(epwp_glm_additive)
+round(cbind(exp(cbind(OR=coef(nzm_glm_additive), confint(nzm_glm_additive))), Pvalue=summary(nzm_glm_additive)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(cim_glm_additive), confint(cim_glm_additive))), Pvalue=summary(cim_glm_additive)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(samoan_glm_additive), confint(samoan_glm_additive))), Pvalue=summary(samoan_glm_additive)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(tongan_glm_additive), confint(tongan_glm_additive))), Pvalue=summary(tongan_glm_additive)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(combined_poly_glm_additive), confint(combined_poly_glm_additive))), Pvalue=summary(combined_poly_glm_additive)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(combined_all_glm_additive), confint(combined_all_glm_additive))), Pvalue=summary(combined_all_glm_additive)$coefficients[,4]),3)
+sink()
+
+additive_table=function(x){write.table(x, file="gout_additive_table_OR.csv",sep="\t", quote=FALSE, append=TRUE)}
+# additive_table(summary(cau_glm_additive)$coefficients)
+# # additive_table(summary(epn_glm_additive)$coefficients)
+# # additive_table(summary(epz_glm_additive)$coefficients)
+# # additive_table(summary(wp_glm_additive)$coefficients)
+# # additive_table(summary(epwp_glm_additive)$coefficients)
+# additive_table(summary(nzm_glm_additive)$coefficients)
+# additive_table(summary(cim_glm_additive)$coefficients)
+# additive_table(summary(samoan_glm_additive)$coefficients)
+# additive_table(summary(tongan_glm_additive)$coefficients)
+# # additive_table(summary(combined_poly_glm_additive)$coefficients)
+# # additive_table(summary(combined_all_glm_additive)$coefficients)
+# additive_table(confint(cau_glm_additive))
+# # additive_table(confint(epn_glm_additive))
+# # additive_table(confint(epz_glm_additive))
+# # additive_table(confint(wp_glm_additive))
+# # additive_table(confint(epwp_glm_additive))
+# additive_table(confint(nzm_glm_additive))
+# additive_table(confint(cim_glm_additive))
+# additive_table(confint(samoan_glm_additive))
+# additive_table(confint(tongan_glm_additive))
+# # additive_table(confint(combined_poly_glm_additive))
+# # additive_table(confint(combined_all_glm_additive))
+
+additive_table(round(cbind(exp(cbind(OR= coef(cau_glm_additive), confint(cau_glm_additive))),Pvalue= summary(cau_glm_additive)$coefficients[,4]),3))
+additive_table(round(cbind(exp(cbind(OR=coef(nzm_glm_additive), confint(nzm_glm_additive))), Pvalue=summary(nzm_glm_additive)$coefficients[,4]),3))
+additive_table(round(cbind(exp(cbind(OR=coef(cim_glm_additive), confint(cim_glm_additive))), Pvalue=summary(cim_glm_additive)$coefficients[,4]),3))
+additive_table(round(cbind(exp(cbind(OR=coef(samoan_glm_additive), confint(samoan_glm_additive))), Pvalue=summary(samoan_glm_additive)$coefficients[,4]),3))
+additive_table(round(cbind(exp(cbind(OR=coef(tongan_glm_additive), confint(tongan_glm_additive))), Pvalue=summary(tongan_glm_additive)$coefficients[,4]),3))
+additive_table(round(cbind(exp(cbind(OR=coef(combined_poly_glm_additive), confint(combined_poly_glm_additive))), Pvalue=summary(combined_poly_glm_additive)$coefficients[,4]),3))
+additive_table(round(cbind(exp(cbind(OR=coef(combined_all_glm_additive), confint(combined_all_glm_additive))), Pvalue=summary(combined_all_glm_additive)$coefficients[,4]),3))
+
+#################################################
+## regressions DOMINANT CC MODEL ###############
+##############################################
+cau_glm_domc=glm(as.factor(CAU$FULLCAUGTAFF) ~CAU$BMI + CAU$AGECOL + as.factor(CAU$SEX.x) + as.factor(CAU$DIABETES)  + as.factor(CAU$DOM_c), family="binomial")
+wp_glm_domc=glm(as.factor(WP$FULLWPGTAFF)~ WP$BMI + WP$AGECOL + as.factor(WP$SEX.x) + as.factor(WP$DIABETES) +WP$STANCESTRY+ as.factor(WP$DOM_c), family="binomial")
+epn_glm_domc=glm(as.factor(EPN$FULLEPGTAFF) ~EPN$BMI + EPN$AGECOL + as.factor(EPN$SEX.x) + as.factor(EPN$DIABETES) +EPN$STANCESTRY + as.factor(EPN$DOM_c), family="binomial")
+epz_glm_domc=glm(as.factor(EPZ$FULLEPGTAFF)~EPZ$BMI + EPZ$AGECOL + as.factor(EPZ$SEX.x) + as.factor(EPZ$DIABETES) +EPZ$STANCESTRY + as.factor(EPZ$DOM_c), family="binomial")
+epwp_glm_domc=glm(as.factor(EPWP$FULLEPWPGTAFF) ~EPWP$BMI+ EPWP$AGECOL + as.factor(EPWP$SEX.x) + as.factor(EPWP$DIABETES) +EPWP$STANCESTRY + as.factor(EPWP$DOM_c), family="binomial")
+nzm_glm_domc=glm(as.factor(nzm$FULLEPGTAFF)~ nzm$BMI+ nzm$AGECOL + as.factor(nzm$SEX.x) + as.factor(nzm$DIABETES) +nzm$STANCESTRY+ as.factor(nzm$DOM_c), family="binomial")
+cim_glm_domc=glm(as.factor(cim$FULLEPGTAFF)~cim$BMI + cim$AGECOL + as.factor(cim$SEX.x) + as.factor(cim$DIABETES) +cim$STANCESTRY+ as.factor(cim$DOM_c), family="binomial")
+samoan_glm_domc=glm(as.factor(samoan$FULLWPGTAFF)~samoan$BMI + samoan$AGECOL + as.factor(samoan$SEX.x) + as.factor(samoan$DIABETES) +samoan$STANCESTRY+ as.factor(samoan$DOM_c), family="binomial")
+tongan_glm_domc=glm(as.factor(tongan$FULLWPGTAFF)~tongan$BMI + tongan$AGECOL + as.factor(tongan$SEX.x) + as.factor(tongan$DIABETES) +tongan$STANCESTRY+ as.factor(tongan$DOM_c), family="binomial")
+
+sink(file="gout_dominant_CC_model_OR.txt")
+# summary(cau_glm_domc)
+# summary(epn_glm_domc)
+# summary(epz_glm_domc)
+# summary(wp_glm_domc)
+# summary(epwp_glm_domc)
+# summary(nzm_glm_domc)
+# summary(cim_glm_domc)
+# summary(samoan_glm_domc)
+# summary(tongan_glm_domc)
+# summary(combined_poly_glm_domc)
+# summary(combined_all_glm_domc)
+round(cbind(exp(cbind(OR= coef(cau_glm_domc), confint(cau_glm_domc))),Pvalue= summary(cau_glm_domc)$coefficients[,4]),3)
+# confint(epn_glm_domc)
+# confint(epz_glm_domc)
+# confint(wp_glm_domc)
+# confint(epwp_glm_domc)
+round(cbind(exp(cbind(OR=coef(nzm_glm_domc), confint(nzm_glm_domc))), Pvalue=summary(nzm_glm_domc)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(cim_glm_domc), confint(cim_glm_domc))), Pvalue=summary(cim_glm_domc)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(samoan_glm_domc), confint(samoan_glm_domc))), Pvalue=summary(samoan_glm_domc)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(tongan_glm_domc), confint(tongan_glm_domc))), Pvalue=summary(tongan_glm_domc)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(combined_poly_glm_domc), confint(combined_poly_glm_domc))), Pvalue=summary(combined_poly_glm_domc)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(combined_all_glm_domc), confint(combined_all_glm_domc))), Pvalue=summary(combined_all_glm_domc)$coefficients[,4]),3)
+
+sink()
+
+domc_table=function(x){write.table(x, file="gout_domc_table_OR.csv",sep="\t", quote=FALSE, append=TRUE)}
+# domc_table(summary(cau_glm_domc)$coefficients)
+# domc_table(summary(epn_glm_domc)$coefficients)
+# domc_table(summary(epz_glm_domc)$coefficients)
+# domc_table(summary(wp_glm_domc)$coefficients)
+# domc_table(summary(epwp_glm_domc)$coefficients)
+# domc_table(summary(nzm_glm_domc)$coefficients)
+# domc_table(summary(cim_glm_domc)$coefficients)
+# domc_table(summary(samoan_glm_domc)$coefficients)
+# domc_table(summary(tongan_glm_domc)$coefficients)
+# domc_table(summary(combined_poly_glm_domc)$coefficients)
+# domc_table(summary(combined_all_glm_domc)$coefficients)
+# domc_table(confint(cau_glm_domc))
+# domc_table(confint(epn_glm_domc))
+# domc_table(confint(epz_glm_domc))
+# domc_table(confint(wp_glm_domc))
+# domc_table(confint(epwp_glm_domc))
+# domc_table(confint(nzm_glm_domc))
+# domc_table(confint(cim_glm_domc))
+# domc_table(confint(samoan_glm_domc))
+# domc_table(confint(tongan_glm_domc))
+# domc_table(confint(combined_poly_glm_domc))
+# domc_table(confint(combined_all_glm_domc))
+domc_table(round(cbind(exp(cbind(OR= coef(cau_glm_domc), confint(cau_glm_domc))),Pvalue= summary(cau_glm_domc)$coefficients[,4]),3))
+domc_table(round(cbind(exp(cbind(OR=coef(nzm_glm_domc), confint(nzm_glm_domc))), Pvalue=summary(nzm_glm_domc)$coefficients[,4]),3))
+domc_table(round(cbind(exp(cbind(OR=coef(cim_glm_domc), confint(cim_glm_domc))), Pvalue=summary(cim_glm_domc)$coefficients[,4]),3))
+domc_table(round(cbind(exp(cbind(OR=coef(samoan_glm_domc), confint(samoan_glm_domc))), Pvalue=summary(samoan_glm_domc)$coefficients[,4]),3))
+domc_table(round(cbind(exp(cbind(OR=coef(tongan_glm_domc), confint(tongan_glm_domc))), Pvalue=summary(tongan_glm_domc)$coefficients[,4]),3))
+domc_table(round(cbind(exp(cbind(OR=coef(combined_poly_glm_domc), confint(combined_poly_glm_domc))), Pvalue=summary(combined_poly_glm_domc)$coefficients[,4]),3))
+domc_table(round(cbind(exp(cbind(OR=coef(combined_all_glm_domc), confint(combined_all_glm_domc))), Pvalue=summary(combined_all_glm_domc)$coefficients[,4]),3))
+
+
+#################################################
+## regressions DOMINANT TT MODEL ###############
+##############################################
+
+cau_glm_domt=glm(as.factor(CAU$FULLCAUGTAFF)~CAU$BMI + CAU$AGECOL + as.factor(CAU$SEX.x) + as.factor(CAU$DIABETES)  + as.factor(CAU$DOM_t), family="binomial")
+wp_glm_domt=glm(as.factor(WP$FULLWPGTAFF) ~WP$BMI+ WP$AGECOL + as.factor(WP$SEX.x) + as.factor(WP$DIABETES) +WP$STANCESTRY+ as.factor(WP$DOM_t), family="binomial")
+epn_glm_domt=glm(as.factor(EPN$FULLEPGTAFF)~EPN$BMI + EPN$AGECOL + as.factor(EPN$SEX.x) + as.factor(EPN$DIABETES) +EPN$STANCESTRY + as.factor(EPN$DOM_t), family="binomial")
+epz_glm_domt=glm(as.factor(EPZ$FULLEPGTAFF)~EPZ$BMI + EPZ$AGECOL + as.factor(EPZ$SEX.x) + as.factor(EPZ$DIABETES) +EPZ$STANCESTRY + as.factor(EPZ$DOM_t), family="binomial")
+epwp_glm_domt=glm(as.factor(EPWP$FULLEPWPGTAFF) ~ EPWP$BMI+ EPWP$AGECOL + as.factor(EPWP$SEX.x) + as.factor(EPWP$DIABETES) +EPWP$STANCESTRY + as.factor(EPWP$DOM_t), family="binomial")
+nzm_glm_domt=glm(as.factor(nzm$FULLEPGTAFF)~nzm$BMI + nzm$AGECOL + as.factor(nzm$SEX.x) + as.factor(nzm$DIABETES) +nzm$STANCESTRY+ as.factor(nzm$DOM_t), family="binomial")
+cim_glm_domt=glm(as.factor(cim$FULLEPGTAFF)~cim$BMI + cim$AGECOL + as.factor(cim$SEX.x) + as.factor(cim$DIABETES) +cim$STANCESTRY+ as.factor(cim$DOM_t), family="binomial")
+samoan_glm_domt=glm(as.factor(samoan$FULLWPGTAFF)~samoan$BMI + samoan$AGECOL + as.factor(samoan$SEX.x) + as.factor(samoan$DIABETES) +samoan$STANCESTRY+ as.factor(samoan$DOM_t), family="binomial")
+tongan_glm_domt=glm(as.factor(tongan$FULLWPGTAFF)~tongan$BMI + tongan$AGECOL + as.factor(tongan$SEX.x) + as.factor(tongan$DIABETES) +tongan$STANCESTRY+ as.factor(tongan$DOM_t), family="binomial")
+
+sink(file="gout_dominant_TT_model_OR.txt")
+# summary(cau_glm_domt)
+# summary(epn_glm_domt)
+# summary(epz_glm_domt)
+# summary(wp_glm_domt)
+# summary(epwp_glm_domt)
+# summary(nzm_glm_domt)
+# summary(cim_glm_domt)
+# summary(samoan_glm_domt)
+# summary(tongan_glm_domt)
+# summary(combined_poly_glm_domt)
+# summary(combined_all_glm_domt)
+round(cbind(exp(cbind(OR= coef(cau_glm_domt), confint(cau_glm_domt))),Pvalue= summary(cau_glm_domt)$coefficients[,4]),3)
+# confint(epn_glm_domt)
+# confint(epz_glm_domt)
+# confint(wp_glm_domt)
+# confint(epwp_glm_domt)
+round(cbind(exp(cbind(OR=coef(nzm_glm_domt), confint(nzm_glm_domt))), Pvalue=summary(nzm_glm_domt)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(cim_glm_domt), confint(cim_glm_domt))), Pvalue=summary(cim_glm_domt)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(samoan_glm_domt), confint(samoan_glm_domt))), Pvalue=summary(samoan_glm_domt)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(tongan_glm_domt), confint(tongan_glm_domt))), Pvalue=summary(tongan_glm_domt)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(combined_poly_glm_domt), confint(combined_poly_glm_domt))), Pvalue=summary(combined_poly_glm_domt)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(combined_all_glm_domt), confint(combined_all_glm_domt))), Pvalue=summary(combined_all_glm_domt)$coefficients[,4]),3)
+sink()
+
+domt_table=function(x){write.table(x, file="gout_domt_table_OR.csv",sep="\t", quote=FALSE, append=TRUE)}
+# domt_table(summary(cau_glm_domt)$coefficients)
+# domt_table(summary(epn_glm_domt)$coefficients)
+# domt_table(summary(epz_glm_domt)$coefficients)
+# domt_table(summary(wp_glm_domt)$coefficients)
+# domt_table(summary(epwp_glm_domt)$coefficients)
+# domt_table(summary(nzm_glm_domt)$coefficients)
+# domt_table(summary(cim_glm_domt)$coefficients)
+# domt_table(summary(samoan_glm_domt)$coefficients)
+# domt_table(summary(tongan_glm_domt)$coefficients)
+# domt_table(summary(combined_poly_glm_domt)$coefficients)
+# domt_table(summary(combined_all_glm_domt)$coefficients)
+# domt_table(confint(cau_glm_domt))
+# domt_table(confint(epn_glm_domt))
+# domt_table(confint(epz_glm_domt))
+# domt_table(confint(wp_glm_domt))
+# domt_table(confint(epwp_glm_domt))
+# domt_table(confint(nzm_glm_domt))
+# domt_table(confint(cim_glm_domt))
+# domt_table(confint(samoan_glm_domt))
+# domt_table(confint(tongan_glm_domt))
+# domt_table(confint(combined_poly_glm_domt))
+# domt_table(confint(combined_all_glm_domt))
+
+domt_table(round(cbind(exp(cbind(OR= coef(cau_glm_domt), confint(cau_glm_domt))),Pvalue= summary(cau_glm_domt)$coefficients[,4]),3))
+domt_table(round(cbind(exp(cbind(OR=coef(nzm_glm_domt), confint(nzm_glm_domt))), Pvalue=summary(nzm_glm_domt)$coefficients[,4]),3))
+domt_table(round(cbind(exp(cbind(OR=coef(cim_glm_domt), confint(cim_glm_domt))), Pvalue=summary(cim_glm_domt)$coefficients[,4]),3))
+domt_table(round(cbind(exp(cbind(OR=coef(samoan_glm_domt), confint(samoan_glm_domt))), Pvalue=summary(samoan_glm_domt)$coefficients[,4]),3))
+domt_table(round(cbind(exp(cbind(OR=coef(tongan_glm_domt), confint(tongan_glm_domt))), Pvalue=summary(tongan_glm_domt)$coefficients[,4]),3))
+domt_table(round(cbind(exp(cbind(OR=coef(combined_poly_glm_domt), confint(combined_poly_glm_domt))), Pvalue=summary(combined_poly_glm_domt)$coefficients[,4]),3))
+domt_table(round(cbind(exp(cbind(OR=coef(combined_all_glm_domt), confint(combined_all_glm_domt))), Pvalue=summary(combined_all_glm_domt)$coefficients[,4]),3))
+
+
+
+#################################################
+## regressions HET ADVANTAGE MODEL ###############
+##############################################
+cau_glm_het_adv=glm(as.factor(CAU$FULLCAUGTAFF)~CAU$BMI + CAU$AGECOL + as.factor(CAU$SEX.x) + as.factor(CAU$DIABETES)  + as.factor(CAU$het_adv), family="binomial")
+wp_glm_het_adv=glm(as.factor(WP$FULLWPGTAFF) ~WP$BMI+ WP$AGECOL + as.factor(WP$SEX.x) + as.factor(WP$DIABETES) +WP$STANCESTRY+ as.factor(WP$het_adv), family="binomial")
+epn_glm_het_adv=glm(as.factor(EPN$FULLEPGTAFF) ~EPN$BMI+ EPN$AGECOL + as.factor(EPN$SEX.x) + as.factor(EPN$DIABETES) +EPN$STANCESTRY + as.factor(EPN$het_adv), family="binomial")
+epz_glm_het_adv=glm(as.factor(EPZ$FULLEPGTAFF) ~EPZ$BMI + EPZ$AGECOL + as.factor(EPZ$SEX.x) + as.factor(EPZ$DIABETES) +EPZ$STANCESTRY + as.factor(EPZ$het_adv), family="binomial")
+epwp_glm_het_adv=glm(as.factor(EPWP$FULLEPWPGTAFF) ~EPWP$BMI+ EPWP$AGECOL + as.factor(EPWP$SEX.x) + as.factor(EPWP$DIABETES) +EPWP$STANCESTRY + as.factor(EPWP$het_adv), family="binomial")
+nzm_glm_het_adv=glm(as.factor(nzm$FULLEPGTAFF)~nzm$BMI + nzm$AGECOL + as.factor(nzm$SEX.x) + as.factor(nzm$DIABETES) +nzm$STANCESTRY+ as.factor(nzm$het_adv), family="binomial")
+cim_glm_het_adv=glm(as.factor(cim$FULLEPGTAFF) ~cim$BMI + cim$AGECOL + as.factor(cim$SEX.x) + as.factor(cim$DIABETES) +cim$STANCESTRY+ as.factor(cim$het_adv), family="binomial")
+samoan_glm_het_adv=glm(as.factor(samoan$FULLWPGTAFF) ~samoan$BMI + samoan$AGECOL + as.factor(samoan$SEX.x) + as.factor(samoan$DIABETES) +samoan$STANCESTRY+ as.factor(samoan$het_adv), family="binomial")
+tongan_glm_het_adv=glm(as.factor(tongan$FULLWPGTAFF) ~tongan$BMI + tongan$AGECOL + as.factor(tongan$SEX.x) + as.factor(tongan$DIABETES) +tongan$STANCESTRY+ as.factor(tongan$het_adv), family="binomial")
+
+sink(file="gout_het_advantage_model_OR.txt")
+# summary(cau_glm_het_adv)
+# summary(epn_glm_het_adv)
+# summary(epz_glm_het_adv)
+# summary(wp_glm_het_adv)
+# summary(epwp_glm_het_adv)
+# summary(nzm_glm_het_adv)
+# summary(cim_glm_het_adv)
+# summary(samoan_glm_het_adv)
+# summary(tongan_glm_het_adv)
+# summary(combined_poly_glm_het_adv)
+# summary(combined_all_glm_het_adv)
+round(cbind(exp(cbind(OR= coef(cau_glm_het_adv), confint(cau_glm_het_adv))),Pvalue= summary(cau_glm_het_adv)$coefficients[,4]),3)
+# confint(epn_glm_het_adv)
+# confint(epz_glm_het_adv)
+# confint(wp_glm_het_adv)
+# confint(epwp_glm_het_adv)
+round(cbind(exp(cbind(OR=coef(nzm_glm_het_adv), confint(nzm_glm_het_adv))), Pvalue=summary(nzm_glm_het_adv)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(cim_glm_het_adv), confint(cim_glm_het_adv))), Pvalue=summary(cim_glm_het_adv)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(samoan_glm_het_adv), confint(samoan_glm_het_adv))), Pvalue=summary(samoan_glm_het_adv)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(tongan_glm_het_adv), confint(tongan_glm_het_adv))), Pvalue=summary(tongan_glm_het_adv)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(combined_poly_glm_het_adv), confint(combined_poly_glm_het_adv))), Pvalue=summary(combined_poly_glm_het_adv)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(combined_all_glm_het_adv), confint(combined_all_glm_het_adv))), Pvalue=summary(combined_all_glm_het_adv)$coefficients[,4]),3)
+sink()
+
+het_adv_table=function(x){write.table(x, file="gout_het_adv_table_OR.csv",sep="\t", quote=FALSE, append=TRUE)}
+# het_adv_table(summary(cau_glm_het_adv)$coefficients)
+# het_adv_table(summary(epn_glm_het_adv)$coefficients)
+# het_adv_table(summary(epz_glm_het_adv)$coefficients)
+# het_adv_table(summary(wp_glm_het_adv)$coefficients)
+# het_adv_table(summary(epwp_glm_het_adv)$coefficients)
+# het_adv_table(summary(nzm_glm_het_adv)$coefficients)
+# het_adv_table(summary(cim_glm_het_adv)$coefficients)
+# het_adv_table(summary(samoan_glm_het_adv)$coefficients)
+# het_adv_table(summary(tongan_glm_het_adv)$coefficients)
+# het_adv_table(summary(combined_poly_glm_het_adv)$coefficients)
+# het_adv_table(summary(combined_all_glm_het_adv)$coefficients)
+# het_adv_table(confint(cau_glm_het_adv))
+# het_adv_table(confint(epn_glm_het_adv))
+# het_adv_table(confint(epz_glm_het_adv))
+# het_adv_table(confint(wp_glm_het_adv))
+# het_adv_table(confint(epwp_glm_het_adv))
+# het_adv_table(confint(nzm_glm_het_adv))
+# het_adv_table(confint(cim_glm_het_adv))
+# het_adv_table(confint(samoan_glm_het_adv))
+# het_adv_table(confint(tongan_glm_het_adv))
+# het_adv_table(confint(combined_poly_glm_het_adv))
+# het_adv_table(confint(combined_all_glm_het_adv))
+
+het_adv_table(round(cbind(exp(cbind(OR= coef(cau_glm_het_adv), confint(cau_glm_het_adv))),Pvalue= summary(cau_glm_het_adv)$coefficients[,4]),3))
+het_adv_table(round(cbind(exp(cbind(OR=coef(nzm_glm_het_adv), confint(nzm_glm_het_adv))), Pvalue=summary(nzm_glm_het_adv)$coefficients[,4]),3))
+het_adv_table(round(cbind(exp(cbind(OR=coef(cim_glm_het_adv), confint(cim_glm_het_adv))), Pvalue=summary(cim_glm_het_adv)$coefficients[,4]),3))
+het_adv_table(round(cbind(exp(cbind(OR=coef(samoan_glm_het_adv), confint(samoan_glm_het_adv))), Pvalue=summary(samoan_glm_het_adv)$coefficients[,4]),3))
+het_adv_table(round(cbind(exp(cbind(OR=coef(tongan_glm_het_adv), confint(tongan_glm_het_adv))), Pvalue=summary(tongan_glm_het_adv)$coefficients[,4]),3))
+het_adv_table(round(cbind(exp(cbind(OR=coef(combined_poly_glm_het_adv), confint(combined_poly_glm_het_adv))), Pvalue=summary(combined_poly_glm_het_adv)$coefficients[,4]),3))
+het_adv_table(round(cbind(exp(cbind(OR=coef(combined_all_glm_het_adv), confint(combined_all_glm_het_adv))), Pvalue=summary(combined_all_glm_het_adv)$coefficients[,4]),3))
+
+
+
+
+basic_info=function(x){
+  print("BMI")
+  print(summary(x$BMI))
+  print("AGECOL")
+  print(summary(x$AGECOL))
+  print("SEX")
+  print(table(x$SEX.x,exclude=NULL))
+  print("DIABETES")
+  print(table(x$DIABETES,exclude=NULL))
+  print("STANCESTRY")
+  print(summary(x$STANCESTRY))
+  print("RS8192678_CC1_CT2_TT3")
+  print(table(x$RS8192678_CC1_CT2_TT3,exclude=NULL))
+  print("FULLCAUGTAFF")
+  print(table(x$FULLCAUGTAFF, exclude=NULL))
+  print("FULLEPGTAFF")
+  print(table(x$FULLEPGTAFF, exclude=NULL))
+  print("FULLWPGTAFF")
+  print(table(x$FULLWPGTAFF, exclude=NULL))
+  print("FULLEPWPGTAFF")
+  print(table(x$FULLEPWPGTAFF, exclude=NULL))
+}

@@ -13,10 +13,12 @@ library(plyr)
 library(scales)
 library(knitr)
 library(xtable)
-library(pander)
-setwd("../Dec2014/TajimaD/")
+
+
+opts_knit$set(root.dir="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/")
+
 get_tajd = function(tajd,pop){
-  a= read.table(tajd, header=TRUE)
+  a= read.table(tajd, header=TRUE, sep="\t")
   b=a[a$TajimaD != "NaN",]
   b$POP=as.factor(rep(pop,length(b[,1])))
   return(b)
@@ -24,13 +26,14 @@ get_tajd = function(tajd,pop){
 ```
 
 ```{r onekb_data, echo=FALSE}
-CEU_tajd=get_tajd(tajd="CEU4_1kb.taj_d","CEU")
-CHB_tajd=get_tajd(tajd="CHB4_1kb.taj_d","CHB")
-CHS_tajd=get_tajd(tajd="CHS4_1kb.taj_d","CHS")
-GBR_tajd=get_tajd(tajd="GBR4_1kb.taj_d","GBR")
-YRI_tajd=get_tajd(tajd="YRI4_1kb.taj_d","YRI")
-AXIOM_tajd=get_tajd(tajd="AXIOM4_1kb.taj_d","Maori")
-OMNI_tajd=get_tajd(tajd="TajimaD/OMNI4_1kb.taj_d","Samoan")
+getwd()
+CEU_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/CEU4_1kb.taj_d","CEU")
+CHB_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/CHB4_1kb.taj_d","CHB")
+CHS_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/CHS4_1kb.taj_d","CHS")
+GBR_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/GBR4_1kb.taj_d","GBR")
+YRI_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/YRI4_1kb.taj_d","YRI")
+AXIOM_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/AXIOM4_1kb.taj_d","Maori")
+OMNI_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/OMNI4_1kb.taj_d","Samoan")
 onekb_td=rbind(CEU_tajd,CHB_tajd,CHS_tajd,GBR_tajd,YRI_tajd,AXIOM_tajd,OMNI_tajd)
 rm(CEU_tajd,CHB_tajd,CHS_tajd,GBR_tajd,YRI_tajd,AXIOM_tajd,OMNI_tajd)
 ```
@@ -45,7 +48,7 @@ window = 1000
 rs8192678=onekb_td[onekb_td$BIN_START < 23815662 & (onekb_td$BIN_START + window) > 23815662,c("POP","BIN_START","TajimaD")]
 tab=merge(tab,rs8192678, by="POP")
 tab[,c("TajimaD","Lower Quantile","Mean","Upper Quantile")]= format(round(tab[,c("TajimaD","Lower Quantile","Mean","Upper Quantile")],digits=3),nsmall=3)
-pandoc(xtable(data.frame(tab[c(1,2,3,4,7,5,6),c("POP","TajimaD","Lower Quantile","Mean","Upper Quantile")], row.names=NULL)),format = "markup")
+xtable(data.frame(tab[c(1,2,3,4,7,5,6),c("POP","TajimaD","Lower Quantile","Mean","Upper Quantile")], row.names=NULL))
 ```
 
 
@@ -53,7 +56,18 @@ pandoc(xtable(data.frame(tab[c(1,2,3,4,7,5,6),c("POP","TajimaD","Lower Quantile"
 ```{r 1kb_plot_setup, echo=FALSE}
 onekb_ss = subset(onekb_td, BIN_START > 22.7e6 & BIN_START < 24.9e6)
 ppargc1a = subset(onekb_td, BIN_START > 23756664 & BIN_START < 23905712)
-p = ggplot(data = onekb_ss, aes(x=BIN_START, y=TajimaD), ylim=c(min(onekb_ss$TajimaD -0.5), max(onekb_ss$TajimaD + 0.5)))  + geom_point(shape = 16, colour= alpha("black", 1/5)) + facet_wrap(~POP, scales = "free_x") + geom_point(data=ppargc1a, aes(y = TajimaD, x=BIN_START,colour="PPARGC1A")) + geom_hline(aes(yintercept= q1, colour ="quantile"), data=s,)  + geom_hline(aes(yintercept= q2, colour ="quantile"), data=s)  +geom_hline(aes(yintercept= m, colour="mean"), data=s) + scale_colour_manual("",breaks=c("mean","quantile","PPARGC1A"),values=c("blue","red","purple")) + scale_x_continuous(breaks=c(23e6,23.5e6,24e6,24.5e6), labels=c("23","23.5", "24", "24.5")) + xlab("Chromosome 4 Position (Mbp)") + ylab("Tajima's D") + ggtitle("Tajima's D at PPARGC1A Locus") + theme( plot.background= element_rect(colour="black",fill=NA), legend.position= c(0.75, 0.12))
+p = ggplot(data = onekb_ss, aes(x=BIN_START, y=TajimaD), ylim=c(min(onekb_ss$TajimaD -0.5), max(onekb_ss$TajimaD + 0.5)))  + geom_point(shape = 16, colour= alpha("black", 1/5)) + facet_wrap(~POP, scales = "free_x") + geom_point(data=ppargc1a, aes(y = TajimaD, x=BIN_START,colour="PPARGC1A")) + geom_hline(aes(yintercept= q1, colour ="quantile"), data=s,)  + geom_hline(aes(yintercept= q2, colour ="quantile"), data=s)  +geom_hline(aes(yintercept= m, colour="mean"), data=s) + scale_colour_manual("",breaks=c("mean","quantile","PPARGC1A"),values=c("blue","red","purple")) + scale_x_continuous(breaks=c(23e6,23.5e6,24e6,24.5e6), labels=c("23","23.5", "24", "24.5")) + xlab("Chromosome 4 Position (Mbp)") + ylab("Tajima's D") + ggtitle("Tajima's D at PPARGC1A Locus (1kb)") + theme( plot.background= element_rect(colour="black",fill=NA), legend.position= c(0.75, 0.12))  + geom_vline(xintercept = 23815662, color="red", linetype="longdash")
+png("tajimaD_1kb.png")
+p
+dev.off()
+
+ppargc1a[ppargc1a$POP == "CEU" & (ppargc1a$TajimaD > s[s$POP=="CEU","q2"] | ppargc1a$TajimaD < s[s$POP=="CEU","q1"]),]
+ppargc1a[ppargc1a$POP == "CHB" & (ppargc1a$TajimaD > s[s$POP=="CHB","q2"] | ppargc1a$TajimaD < s[s$POP=="CHB","q1"]),]
+ppargc1a[ppargc1a$POP == "CHS" & (ppargc1a$TajimaD > s[s$POP=="CHS","q2"] | ppargc1a$TajimaD < s[s$POP=="CHS","q1"]),]
+ppargc1a[ppargc1a$POP == "GBR" & (ppargc1a$TajimaD > s[s$POP=="GBR","q2"] | ppargc1a$TajimaD < s[s$POP=="GBR","q1"]),]
+ppargc1a[ppargc1a$POP == "YRI" & (ppargc1a$TajimaD > s[s$POP=="YRI","q2"] | ppargc1a$TajimaD < s[s$POP=="YRI","q1"]),]
+ppargc1a[ppargc1a$POP == "Maori" & (ppargc1a$TajimaD > s[s$POP=="Maori","q2"] | ppargc1a$TajimaD < s[s$POP=="Maori","q1"]),]
+ppargc1a[ppargc1a$POP == "Samoan" & (ppargc1a$TajimaD > s[s$POP=="Samoan","q2"] | ppargc1a$TajimaD < s[s$POP=="Samoan","q1"]),]
 ```
 
 
@@ -68,13 +82,13 @@ p
 
 
 ```{r fivekb_data, echo=FALSE}
-CEU_tajd=get_tajd(tajd="CEU4_5kb.taj_d","CEU")
-CHB_tajd=get_tajd(tajd="CHB4_5kb.taj_d","CHB")
-CHS_tajd=get_tajd(tajd="CHS4_5kb.taj_d","CHS")
-GBR_tajd=get_tajd(tajd="GBR4_5kb.taj_d","GBR")
-YRI_tajd=get_tajd(tajd="YRI4_5kb.taj_d","YRI")
-AXIOM_tajd=get_tajd(tajd="AXIOM4_5kb.taj_d","Maori")
-OMNI_tajd=get_tajd(tajd="OMNI4_5kb.taj_d","Samoan")
+CEU_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/CEU4_5kb.taj_d","CEU")
+CHB_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/CHB4_5kb.taj_d","CHB")
+CHS_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/CHS4_5kb.taj_d","CHS")
+GBR_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/GBR4_5kb.taj_d","GBR")
+YRI_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/YRI4_5kb.taj_d","YRI")
+AXIOM_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/AXIOM4_5kb.taj_d","Maori")
+OMNI_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/OMNI4_5kb.taj_d","Samoan")
 fivekb_td=rbind(CEU_tajd,CHB_tajd,CHS_tajd,GBR_tajd,YRI_tajd,AXIOM_tajd,OMNI_tajd)
 rm(CEU_tajd,CHB_tajd,CHS_tajd,GBR_tajd,YRI_tajd,AXIOM_tajd,OMNI_tajd)
 ```
@@ -89,7 +103,7 @@ window = 5000
 rs8192678=fivekb_td[fivekb_td$BIN_START < 23815662 & (fivekb_td$BIN_START + window) > 23815662,c("POP","BIN_START","TajimaD")]
 tab=merge(tab,rs8192678, by="POP")
 tab[,c("TajimaD","Lower Quantile","Mean","Upper Quantile")]= format(round(tab[,c("TajimaD","Lower Quantile","Mean","Upper Quantile")],digits=3),nsmall=3)
-pandoc(xtable(data.frame(tab[c(1,2,3,4,7,5,6),c("POP","TajimaD","Lower Quantile","Mean","Upper Quantile")], row.names=NULL)),format = "markup")
+xtable(data.frame(tab[c(1,2,3,4,7,5,6),c("POP","TajimaD","Lower Quantile","Mean","Upper Quantile")], row.names=NULL))
 ```
 
 
@@ -97,7 +111,19 @@ pandoc(xtable(data.frame(tab[c(1,2,3,4,7,5,6),c("POP","TajimaD","Lower Quantile"
 ```{r fivekb_plot_setup, echo=FALSE}
 fivekb_ss = subset(fivekb_td, BIN_START > 22.7e6 & BIN_START < 24.9e6)
 ppargc1a = subset(fivekb_td, BIN_START > 23756664 & BIN_START < 23905712)
-p = ggplot(data = fivekb_ss, aes(x=BIN_START, y=TajimaD), ylim=c(min(fivekb_ss$TajimaD -0.5), max(fivekb_ss$TajimaD + 0.5)))  + geom_point(shape = 16, colour= alpha("black", 1/5)) + facet_wrap(~POP, scales = "free_x") + geom_point(data=ppargc1a, aes(y = TajimaD, x=BIN_START,colour="PPARGC1A")) + geom_hline(aes(yintercept= q1, colour ="quantile"), data=s,)  + geom_hline(aes(yintercept= q2, colour ="quantile"), data=s)  +geom_hline(aes(yintercept= m, colour="mean"), data=s) + scale_colour_manual("",breaks=c("mean","quantile","PPARGC1A"),values=c("blue","red","purple")) + scale_x_continuous(breaks=c(23e6,23.5e6,24e6,24.5e6), labels=c("23","23.5", "24", "24.5")) + xlab("Chromosome 4 Position (Mbp)") + ylab("Tajima's D") + ggtitle("Tajima's D at PPARGC1A Locus") + theme( plot.background= element_rect(colour="black",fill=NA), legend.position= c(0.75, 0.12))
+p = ggplot(data = fivekb_ss, aes(x=BIN_START, y=TajimaD), ylim=c(min(fivekb_ss$TajimaD -0.5), max(fivekb_ss$TajimaD + 0.5)))  + geom_point(shape = 16, colour= alpha("black", 1/5)) + facet_wrap(~POP, scales = "free_x") + geom_point(data=ppargc1a, aes(y = TajimaD, x=BIN_START,colour="PPARGC1A")) + geom_hline(aes(yintercept= q1, colour ="quantile"), data=s,)  + geom_hline(aes(yintercept= q2, colour ="quantile"), data=s)  +geom_hline(aes(yintercept= m, colour="mean"), data=s) + scale_colour_manual("",breaks=c("mean","quantile","PPARGC1A"),values=c("blue","red","purple")) + scale_x_continuous(breaks=c(23e6,23.5e6,24e6,24.5e6), labels=c("23","23.5", "24", "24.5")) + xlab("Chromosome 4 Position (Mbp)") + ylab("Tajima's D") + ggtitle("Tajima's D at PPARGC1A Locus (5kb)") + theme( plot.background= element_rect(colour="black",fill=NA), legend.position= c(0.75, 0.12)) + geom_vline(xintercept = 23815662, color="red", linetype="longdash")
+
+png("tajimaD_5kb.png")
+p
+dev.off()
+
+ppargc1a[ppargc1a$POP == "CEU" & (ppargc1a$TajimaD > s[s$POP=="CEU","q2"] | ppargc1a$TajimaD < s[s$POP=="CEU","q1"]),]
+ppargc1a[ppargc1a$POP == "CHB" & (ppargc1a$TajimaD > s[s$POP=="CHB","q2"] | ppargc1a$TajimaD < s[s$POP=="CHB","q1"]),]
+ppargc1a[ppargc1a$POP == "CHS" & (ppargc1a$TajimaD > s[s$POP=="CHS","q2"] | ppargc1a$TajimaD < s[s$POP=="CHS","q1"]),]
+ppargc1a[ppargc1a$POP == "GBR" & (ppargc1a$TajimaD > s[s$POP=="GBR","q2"] | ppargc1a$TajimaD < s[s$POP=="GBR","q1"]),]
+ppargc1a[ppargc1a$POP == "YRI" & (ppargc1a$TajimaD > s[s$POP=="YRI","q2"] | ppargc1a$TajimaD < s[s$POP=="YRI","q1"]),]
+ppargc1a[ppargc1a$POP == "Maori" & (ppargc1a$TajimaD > s[s$POP=="Maori","q2"] | ppargc1a$TajimaD < s[s$POP=="Maori","q1"]),]
+ppargc1a[ppargc1a$POP == "Samoan" & (ppargc1a$TajimaD > s[s$POP=="Samoan","q2"] | ppargc1a$TajimaD < s[s$POP=="Samoan","q1"]),]
 ```
 
 
@@ -113,13 +139,13 @@ p
 
 
 ```{r thirtykb_data, echo=FALSE}
-CEU_tajd=get_tajd(tajd="CEU4_30kb.taj_d","CEU")
-CHB_tajd=get_tajd(tajd="CHB4_30kb.taj_d","CHB")
-CHS_tajd=get_tajd(tajd="CHS4_30kb.taj_d","CHS")
-GBR_tajd=get_tajd(tajd="GBR4_30kb.taj_d","GBR")
-YRI_tajd=get_tajd(tajd="YRI4_30kb.taj_d","YRI")
-AXIOM_tajd=get_tajd(tajd="AXIOM4_30kb.taj_d","Maori")
-OMNI_tajd=get_tajd(tajd="OMNI4_30kb.taj_d","Samoan")
+CEU_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/CEU4_30kb.taj_d","CEU")
+CHB_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/CHB4_30kb.taj_d","CHB")
+CHS_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/CHS4_30kb.taj_d","CHS")
+GBR_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/GBR4_30kb.taj_d","GBR")
+YRI_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/YRI4_30kb.taj_d","YRI")
+AXIOM_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/AXIOM4_30kb.taj_d","Maori")
+OMNI_tajd=get_tajd(tajd="~/Documents/PPARGC1A/Analysis/Dec2014/TajimaD/OMNI4_30kb.taj_d","Samoan")
 thirtykb_td=rbind(CEU_tajd,CHB_tajd,CHS_tajd,GBR_tajd,YRI_tajd,AXIOM_tajd,OMNI_tajd)
 rm(CEU_tajd,CHB_tajd,CHS_tajd,GBR_tajd,YRI_tajd,AXIOM_tajd,OMNI_tajd)
 ```
@@ -134,7 +160,7 @@ window = 30000
 rs8192678=thirtykb_td[thirtykb_td$BIN_START < 23815662 & (thirtykb_td$BIN_START + window) > 23815662,c("POP","BIN_START","TajimaD")]
 tab=merge(tab,rs8192678, by="POP")
 tab[,c("TajimaD","Lower Quantile","Mean","Upper Quantile")]= format(round(tab[,c("TajimaD","Lower Quantile","Mean","Upper Quantile")],digits=3),nsmall=3)
-pandoc(xtable(data.frame(tab[c(1,2,3,4,7,5,6),c("POP","TajimaD","Lower Quantile","Mean","Upper Quantile")], row.names=NULL)),format = "markup")
+xtable(data.frame(tab[c(1,2,3,4,7,5,6),c("POP","TajimaD","Lower Quantile","Mean","Upper Quantile")], row.names=NULL))
 ```
 
 
@@ -142,7 +168,19 @@ pandoc(xtable(data.frame(tab[c(1,2,3,4,7,5,6),c("POP","TajimaD","Lower Quantile"
 ```{r thirtykb_plot_setup, echo=FALSE}
 thirtykb_ss = subset(thirtykb_td, BIN_START > 22.7e6 & BIN_START < 24.9e6)
 ppargc1a = subset(thirtykb_td, BIN_START > 23756664 & BIN_START < 23905712)
-p = ggplot(data = thirtykb_ss, aes(x=BIN_START, y=TajimaD), ylim=c(min(thirtykb_ss$TajimaD -0.5), max(thirtykb_ss$TajimaD + 0.5)))  + geom_point(shape = 16, colour= alpha("black", 1/5)) + facet_wrap(~POP, scales = "free_x") + geom_point(data=ppargc1a, aes(y = TajimaD, x=BIN_START,colour="PPARGC1A")) + geom_hline(aes(yintercept= q1, colour ="quantile"), data=s,)  + geom_hline(aes(yintercept= q2, colour ="quantile"), data=s)  +geom_hline(aes(yintercept= m, colour="mean"), data=s) + scale_colour_manual("",breaks=c("mean","quantile","PPARGC1A"),values=c("blue","red","purple")) + scale_x_continuous(breaks=c(23e6,23.5e6,24e6,24.5e6), labels=c("23","23.5", "24", "24.5")) + xlab("Chromosome 4 Position (Mbp)") + ylab("Tajima's D") + ggtitle("Tajima's D at PPARGC1A Locus") + theme( plot.background= element_rect(colour="black",fill=NA), legend.position= c(0.75, 0.12))
+p = ggplot(data = thirtykb_ss, aes(x=BIN_START, y=TajimaD), ylim=c(min(thirtykb_ss$TajimaD -0.5), max(thirtykb_ss$TajimaD + 0.5)))  + geom_point(shape = 16, colour= alpha("black", 1/5)) + facet_wrap(~POP, scales = "free_x") + geom_point(data=ppargc1a, aes(y = TajimaD, x=BIN_START,colour="PPARGC1A")) + geom_hline(aes(yintercept= q1, colour ="quantile"), data=s,)  + geom_hline(aes(yintercept= q2, colour ="quantile"), data=s)  +geom_hline(aes(yintercept= m, colour="mean"), data=s) + scale_colour_manual("",breaks=c("mean","quantile","PPARGC1A"),values=c("blue","red","purple")) + scale_x_continuous(breaks=c(23e6,23.5e6,24e6,24.5e6), labels=c("23","23.5", "24", "24.5")) + xlab("Chromosome 4 Position (Mbp)") + ylab("Tajima's D") + ggtitle("Tajima's D at PPARGC1A Locus (30kb)") + theme( plot.background= element_rect(colour="black",fill=NA), legend.position= c(0.75, 0.12)) + geom_vline(xintercept = 23815662, color="red", linetype="longdash")
+
+png("tajimaD_30kb.png")
+p
+dev.off()
+
+ppargc1a[ppargc1a$POP == "CEU" & (ppargc1a$TajimaD > s[s$POP=="CEU","q2"] | ppargc1a$TajimaD < s[s$POP=="CEU","q1"]),]
+ppargc1a[ppargc1a$POP == "CHB" & (ppargc1a$TajimaD > s[s$POP=="CHB","q2"] | ppargc1a$TajimaD < s[s$POP=="CHB","q1"]),]
+ppargc1a[ppargc1a$POP == "CHS" & (ppargc1a$TajimaD > s[s$POP=="CHS","q2"] | ppargc1a$TajimaD < s[s$POP=="CHS","q1"]),]
+ppargc1a[ppargc1a$POP == "GBR" & (ppargc1a$TajimaD > s[s$POP=="GBR","q2"] | ppargc1a$TajimaD < s[s$POP=="GBR","q1"]),]
+ppargc1a[ppargc1a$POP == "YRI" & (ppargc1a$TajimaD > s[s$POP=="YRI","q2"] | ppargc1a$TajimaD < s[s$POP=="YRI","q1"]),]
+ppargc1a[ppargc1a$POP == "Maori" & (ppargc1a$TajimaD > s[s$POP=="Maori","q2"] | ppargc1a$TajimaD < s[s$POP=="Maori","q1"]),]
+ppargc1a[ppargc1a$POP == "Samoan" & (ppargc1a$TajimaD > s[s$POP=="Samoan","q2"] | ppargc1a$TajimaD < s[s$POP=="Samoan","q1"]),]
 ```
 
 

@@ -1,0 +1,130 @@
+---
+title: "Untitled"
+author: "Murray Cadzow"
+date: "08/12/2014"
+output: pdf_document
+---
+
+```{r, echo=FALSE}
+library(ggplot2)
+library(plyr)
+library(scales)
+library(rehh)
+library(knitr)
+#opts_knit$set(root.dir="~/Documents/PPARGC1A/Analysis/Dec2014/Gen_iHH/")
+get_rsb = function(pop1, popihh1, pop2, popihh2){
+  combined= merge(x=popihh1, y=popihh2, by="POSITION")
+  a= ies2rsb(combined[,c("CHR.x","POSITION","FREQ_a.x","IHHa.x","IHHd.x","IES.x")], combined[,c("CHR.y","POSITION","FREQ_a.y","IHHa.y","IHHd.y","IES.y")],
+             popname1=pop1, popname2=pop2, method="bilateral")
+  b=a$res.rsb[!(is.na(a$res.rsb[3])),]
+  b$POP1= as.factor(pop1)
+  b$POP2= as.factor(pop2)
+  b$Test = as.factor("Rsb")
+  names(b)=c("CHR","POSITION","Std_iHH","Pvalue", "POP1","POP2","Test")
+  return(b[b[,2] <24.9e6 & b[,2] > 22.7e6 ,])
+}
+
+get_ihs = function(pop1, popihh1){
+  a = ihh2ihs(popihh1)
+  b=a$res.ihs[!(is.na(a$res.ihs[3])),]
+  b$POP1= as.factor(pop1)
+  b$POP2= as.factor(pop1)
+  b$Test = as.factor("iHS")
+  names(b)= c("CHR","POSITION","Std_iHH","Pvalue","POP1","POP2","Test")
+  return(b[b[,2] <24.9e6 & b[,2] > 22.7e6, ])
+}
+```
+
+```{r, readData, echo=FALSE}
+if(!exists("rsb.RData")){
+CEU_ihh=read.table("CEUchr4.ihh")
+CHB_ihh=read.table("CHBchr4.ihh")
+CHS_ihh=read.table("CHSchr4.ihh")
+GBR_ihh=read.table("GBRchr4.ihh")
+YRI_ihh=read.table("YRIchr4.ihh")
+AXIOM_ihh=read.table("AXIOMchr4.ihh")
+OMNI_ihh=read.table("OMNIchr4.ihh")
+}
+```
+
+```{r,rsb, warning=FALSE, echo=FALSE, message=FALSE}
+if(exists("rsb.Rdata")){
+  load("rsb.Rdata")
+}else{
+rsb=get_ihs(pop1="CEU", popihh1=CEU_ihh)
+rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="CHB", popihh2=CHB_ihh))
+rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="CHS", popihh2=CHS_ihh))
+rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="GBR", popihh2=GBR_ihh))
+rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="YRI", popihh2=YRI_ihh))
+rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
+rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="Samoan", popihh2=OMNI_ihh))
+
+rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="CEU", popihh2=CEU_ihh))
+rsb=rbind(rsb, get_ihs(pop1="CHB", popihh1=CHB_ihh))
+rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="CHS", popihh2=CHS_ihh))
+rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="GBR", popihh2=GBR_ihh))
+rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="YRI", popihh2=YRI_ihh))
+rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
+rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="Samoan", popihh2=OMNI_ihh))
+
+rsb=rbind(rsb,get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="CEU", popihh2=CEU_ihh))
+rsb=rbind(rsb, get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="CHB", popihh2=CHB_ihh))
+rsb=rbind(rsb, get_ihs(pop1="CHS", popihh1=CHS_ihh))
+rsb=rbind(rsb,get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="GBR", popihh2=GBR_ihh))
+rsb=rbind(rsb, get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="YRI", popihh2=YRI_ihh))
+rsb=rbind(rsb, get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
+rsb=rbind(rsb, get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="Samoan", popihh2=OMNI_ihh))
+
+rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="CEU", popihh2=CEU_ihh))
+rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="CHB", popihh2=CHB_ihh))
+rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="CHS", popihh2=CHS_ihh))
+rsb=rbind(rsb, get_ihs(pop1="GBR", popihh1=GBR_ihh))
+rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="YRI", popihh2=YRI_ihh))
+rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
+rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="Samoan", popihh2=OMNI_ihh))
+
+rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="CEU", popihh2=CEU_ihh))
+rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="CHB", popihh2=CHB_ihh))
+rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="CHS", popihh2=CHS_ihh))
+rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="GBR", popihh2=GBR_ihh))
+rsb=rbind(rsb, get_ihs(pop1="YRI", popihh1=YRI_ihh))
+rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
+rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="Samoan", popihh2=OMNI_ihh))
+
+rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="CEU", popihh2=CEU_ihh))
+rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="CHB", popihh2=CHB_ihh))
+rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="CHS", popihh2=CHS_ihh))
+rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="GBR", popihh2=GBR_ihh))
+rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="YRI", popihh2=YRI_ihh))
+rsb=rbind(rsb, get_ihs(pop1="NZ Maori", popihh1=AXIOM_ihh))
+rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="Samoan", popihh2=OMNI_ihh))
+
+rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="CEU", popihh2=CEU_ihh))
+rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="CHB", popihh2=CHB_ihh))
+rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="CHS", popihh2=CHS_ihh))
+rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="GBR", popihh2=GBR_ihh))
+rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="YRI", popihh2=YRI_ihh))
+rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
+rsb=rbind(rsb, get_ihs(pop1="Samoan", popihh1=OMNI_ihh))
+save(rsb, file="rsb.Rdata")
+}
+```
+
+```{r, echo=FALSE, message=FALSE }
+ppargc1a_rsb = subset(rsb, POSITION > 23756664 & POSITION < 23905712 & Test == "Rsb")
+ppargc1a_ihs = subset(rsb, POSITION > 23756664 & POSITION < 23905712 & Test == "iHS")
+p = ggplot(data = rsb, aes(x=POSITION, y=Std_iHH), ylim=c(min(rsb$Std_iHH -0.5), max(rsb$Std_iHH + 0.5)))  + geom_point(shape = 16, colour= alpha("black", 1/5)) + facet_grid(POP1~POP2) + geom_point(data=ppargc1a_rsb, aes(y = Std_iHH, x=POSITION,colour="PPARGC1A Rsb")) + geom_point(data=ppargc1a_ihs, aes(y = Std_iHH, x=POSITION,colour="PPARGC1A iHS"))+ geom_hline(aes(yintercept= -3.29, colour ="Threshold"))  + geom_hline(aes(yintercept= 3.29, colour ="Threshold"))  + scale_colour_manual("",breaks=c("Threshold","PPARGC1A Rsb","PPARGC1A iHS"),values=c(alpha("cyan",1/5), alpha("red",1/5),"blue")) + scale_x_continuous(breaks=c(23e6,23.5e6,24e6,24.5e6), labels=c("23","23.5", "24", "24.5")) + xlab("Chromosome 4 Position (Mbp)") + ylab("Rsb/iHS") + ggtitle("Rsb and iHS at PPARGC1A Locus (Genetic)") + geom_vline(xintercept = 23815662, color="red", linetype="longdash")
+```
+
+```{r,fig.height=8, fig.width=8, echo=FALSE}
+png("trellis_plot.png", width=1000, height=1000)
+p
+dev.off()
+```
+
+![alt text](trellis_plot.png)
+
+```{r}
+ppargc1a=subset(rsb, POSITION > 23756664 & POSITION < 23905712)
+ppargc1a[abs(ppargc1a$Std_iHH) > 3.29,]
+```
