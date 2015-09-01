@@ -9,9 +9,10 @@ output: pdf_document
 library(ggplot2)
 library(plyr)
 library(scales)
+library(grid)
 library(rehh)
 library(knitr)
-#opts_knit$set(root.dir="~/Documents/PPARGC1A/Analysis/Dec2014/Gen_iHH/")
+opts_knit$set(root.dir="~/Documents/PPARGC1A/Analysis/Dec2014/Gen_iHH/")
 get_rsb = function(pop1, popihh1, pop2, popihh2){
   combined= merge(x=popihh1, y=popihh2, by="POSITION")
   a= ies2rsb(combined[,c("CHR.x","POSITION","FREQ_a.x","IHHa.x","IHHd.x","IES.x")], combined[,c("CHR.y","POSITION","FREQ_a.y","IHHa.y","IHHd.y","IES.y")],
@@ -22,7 +23,7 @@ get_rsb = function(pop1, popihh1, pop2, popihh2){
   b$Test = as.factor("Rsb")
   names(b)=c("CHR","POSITION","Std_iHH","Pvalue", "POP1","POP2","Test")
   return(b[b[,2] <24.9e6 & b[,2] > 22.7e6 ,])
-}
+  }
 
 get_ihs = function(pop1, popihh1){
   a = ihh2ihs(popihh1)
@@ -30,99 +31,102 @@ get_ihs = function(pop1, popihh1){
   b$POP1= as.factor(pop1)
   b$POP2= as.factor(pop1)
   b$Test = as.factor("iHS")
+  png(paste0(pop1,"_density.png"))
+  distribplot(b$iHS, main = paste0(pop1," iHS Density"))
+  dev.off()
   names(b)= c("CHR","POSITION","Std_iHH","Pvalue","POP1","POP2","Test")
   return(b[b[,2] <24.9e6 & b[,2] > 22.7e6, ])
-}
+  }
 ```
 
 ```{r, readData, echo=FALSE}
-if(!exists("rsb.RData")){
-CEU_ihh=read.table("CEUchr4.ihh")
-CHB_ihh=read.table("CHBchr4.ihh")
-CHS_ihh=read.table("CHSchr4.ihh")
-GBR_ihh=read.table("GBRchr4.ihh")
-YRI_ihh=read.table("YRIchr4.ihh")
-AXIOM_ihh=read.table("AXIOMchr4.ihh")
-OMNI_ihh=read.table("OMNIchr4.ihh")
-}
+if(!file.exists("rsb.Rdata")){
+  CEU_ihh=read.table("CEUchr4.ihh")
+  CHB_ihh=read.table("CHBchr4.ihh")
+  CHS_ihh=read.table("CHSchr4.ihh")
+  GBR_ihh=read.table("GBRchr4.ihh")
+  YRI_ihh=read.table("YRIchr4.ihh")
+  AXIOM_ihh=read.table("AXIOMchr4.ihh")
+  OMNI_ihh=read.table("OMNIchr4.ihh")
+  }
 ```
 
 ```{r,rsb, warning=FALSE, echo=FALSE, message=FALSE}
-if(exists("rsb.Rdata")){
+if(file.exists("rsb.Rdata")){
   load("rsb.Rdata")
-}else{
-rsb=get_ihs(pop1="CEU", popihh1=CEU_ihh)
-rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="CHB", popihh2=CHB_ihh))
-rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="CHS", popihh2=CHS_ihh))
-rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="GBR", popihh2=GBR_ihh))
-rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="YRI", popihh2=YRI_ihh))
-rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
-rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="Samoan", popihh2=OMNI_ihh))
-
-rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="CEU", popihh2=CEU_ihh))
-rsb=rbind(rsb, get_ihs(pop1="CHB", popihh1=CHB_ihh))
-rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="CHS", popihh2=CHS_ihh))
-rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="GBR", popihh2=GBR_ihh))
-rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="YRI", popihh2=YRI_ihh))
-rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
-rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="Samoan", popihh2=OMNI_ihh))
-
-rsb=rbind(rsb,get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="CEU", popihh2=CEU_ihh))
-rsb=rbind(rsb, get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="CHB", popihh2=CHB_ihh))
-rsb=rbind(rsb, get_ihs(pop1="CHS", popihh1=CHS_ihh))
-rsb=rbind(rsb,get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="GBR", popihh2=GBR_ihh))
-rsb=rbind(rsb, get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="YRI", popihh2=YRI_ihh))
-rsb=rbind(rsb, get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
-rsb=rbind(rsb, get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="Samoan", popihh2=OMNI_ihh))
-
-rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="CEU", popihh2=CEU_ihh))
-rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="CHB", popihh2=CHB_ihh))
-rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="CHS", popihh2=CHS_ihh))
-rsb=rbind(rsb, get_ihs(pop1="GBR", popihh1=GBR_ihh))
-rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="YRI", popihh2=YRI_ihh))
-rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
-rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="Samoan", popihh2=OMNI_ihh))
-
-rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="CEU", popihh2=CEU_ihh))
-rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="CHB", popihh2=CHB_ihh))
-rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="CHS", popihh2=CHS_ihh))
-rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="GBR", popihh2=GBR_ihh))
-rsb=rbind(rsb, get_ihs(pop1="YRI", popihh1=YRI_ihh))
-rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
-rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="Samoan", popihh2=OMNI_ihh))
-
-rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="CEU", popihh2=CEU_ihh))
-rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="CHB", popihh2=CHB_ihh))
-rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="CHS", popihh2=CHS_ihh))
-rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="GBR", popihh2=GBR_ihh))
-rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="YRI", popihh2=YRI_ihh))
-rsb=rbind(rsb, get_ihs(pop1="NZ Maori", popihh1=AXIOM_ihh))
-rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="Samoan", popihh2=OMNI_ihh))
-
-rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="CEU", popihh2=CEU_ihh))
-rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="CHB", popihh2=CHB_ihh))
-rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="CHS", popihh2=CHS_ihh))
-rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="GBR", popihh2=GBR_ihh))
-rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="YRI", popihh2=YRI_ihh))
-rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
-rsb=rbind(rsb, get_ihs(pop1="Samoan", popihh1=OMNI_ihh))
-save(rsb, file="rsb.Rdata")
-}
+  }else{
+    rsb=get_ihs(pop1="CEU", popihh1=CEU_ihh)
+    rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="CHB", popihh2=CHB_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="CHS", popihh2=CHS_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="GBR", popihh2=GBR_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="YRI", popihh2=YRI_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="CEU", popihh1=CEU_ihh, pop2="Samoan", popihh2=OMNI_ihh))
+    
+    rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="CEU", popihh2=CEU_ihh))
+    rsb=rbind(rsb, get_ihs(pop1="CHB", popihh1=CHB_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="CHS", popihh2=CHS_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="GBR", popihh2=GBR_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="YRI", popihh2=YRI_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="CHB", popihh1=CHB_ihh, pop2="Samoan", popihh2=OMNI_ihh))
+    
+    rsb=rbind(rsb,get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="CEU", popihh2=CEU_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="CHB", popihh2=CHB_ihh))
+    rsb=rbind(rsb, get_ihs(pop1="CHS", popihh1=CHS_ihh))
+    rsb=rbind(rsb,get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="GBR", popihh2=GBR_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="YRI", popihh2=YRI_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="CHS", popihh1=CHS_ihh, pop2="Samoan", popihh2=OMNI_ihh))
+    
+    rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="CEU", popihh2=CEU_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="CHB", popihh2=CHB_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="CHS", popihh2=CHS_ihh))
+    rsb=rbind(rsb, get_ihs(pop1="GBR", popihh1=GBR_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="YRI", popihh2=YRI_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="GBR", popihh1=GBR_ihh, pop2="Samoan", popihh2=OMNI_ihh))
+    
+    rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="CEU", popihh2=CEU_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="CHB", popihh2=CHB_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="CHS", popihh2=CHS_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="GBR", popihh2=GBR_ihh))
+    rsb=rbind(rsb, get_ihs(pop1="YRI", popihh1=YRI_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="YRI", popihh1=YRI_ihh, pop2="Samoan", popihh2=OMNI_ihh))
+    
+    rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="CEU", popihh2=CEU_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="CHB", popihh2=CHB_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="CHS", popihh2=CHS_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="GBR", popihh2=GBR_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="YRI", popihh2=YRI_ihh))
+    rsb=rbind(rsb, get_ihs(pop1="NZ Maori", popihh1=AXIOM_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="NZ Maori", popihh1=AXIOM_ihh, pop2="Samoan", popihh2=OMNI_ihh))
+    
+    rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="CEU", popihh2=CEU_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="CHB", popihh2=CHB_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="CHS", popihh2=CHS_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="GBR", popihh2=GBR_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="YRI", popihh2=YRI_ihh))
+    rsb=rbind(rsb, get_rsb(pop1="Samoan", popihh1=OMNI_ihh, pop2="NZ Maori", popihh2=AXIOM_ihh))
+    rsb=rbind(rsb, get_ihs(pop1="Samoan", popihh1=OMNI_ihh))
+    save(rsb, file="rsb.Rdata")
+    }
 ```
 
 ```{r, echo=FALSE, message=FALSE }
 ppargc1a_rsb = subset(rsb, POSITION > 23756664 & POSITION < 23905712 & Test == "Rsb")
 ppargc1a_ihs = subset(rsb, POSITION > 23756664 & POSITION < 23905712 & Test == "iHS")
-p = ggplot(data = rsb, aes(x=POSITION, y=Std_iHH), ylim=c(min(rsb$Std_iHH -0.5), max(rsb$Std_iHH + 0.5)))  + geom_point(shape = 16, colour= alpha("black", 1/5)) + facet_grid(POP1~POP2) + geom_point(data=ppargc1a_rsb, aes(y = Std_iHH, x=POSITION,colour="PPARGC1A Rsb")) + geom_point(data=ppargc1a_ihs, aes(y = Std_iHH, x=POSITION,colour="PPARGC1A iHS"))+ geom_hline(aes(yintercept= -3.29, colour ="Threshold"))  + geom_hline(aes(yintercept= 3.29, colour ="Threshold"))  + scale_colour_manual("",breaks=c("Threshold","PPARGC1A Rsb","PPARGC1A iHS"),values=c(alpha("cyan",1/5), alpha("red",1/5),"blue")) + scale_x_continuous(breaks=c(23e6,23.5e6,24e6,24.5e6), labels=c("23","23.5", "24", "24.5")) + xlab("Chromosome 4 Position (Mbp)") + ylab("Rsb/iHS") + ggtitle("Rsb and iHS at PPARGC1A Locus (Genetic)") + geom_vline(xintercept = 23815662, color="red", linetype="longdash")
+p = ggplot(data = rsb, aes(x=POSITION, y=Std_iHH), ylim=c(min(rsb$Std_iHH -0.5), max(rsb$Std_iHH + 0.5)))  + geom_point(shape = 16, colour= alpha("black", 1/5)) + facet_grid(POP1~POP2) + geom_point(data=ppargc1a_rsb, aes(y = Std_iHH, x=POSITION,colour="PPARGC1A XP-EHH")) + geom_point(data=ppargc1a_ihs, aes(y = Std_iHH, x=POSITION,colour="PPARGC1A iHS"))+ geom_hline(aes(yintercept= -3.29, colour ="Threshold"))  + geom_hline(aes(yintercept= 3.29, colour ="Threshold"))  + scale_colour_manual("",breaks=c("Threshold","PPARGC1A XP-EHH","PPARGC1A iHS"),values=c(alpha("cyan",1/5), alpha("red",1/5),"blue")) + scale_x_continuous(breaks=c(23e6, 23.5e6, 24e6, 24.5e6), labels=c("23","", "24","")) + xlab("Chromosome 4 Position (Mbp)") + ylab("XP-EHH / iHS")  + geom_vline(xintercept = 23815662, color="red", linetype="longdash") + theme_bw() + theme(strip.text.x=element_text(size=16), strip.text.y=element_text(size=16), legend.position='none', axis.text.x = element_text(size=16), axis.text.y = element_text(size=16), axis.title.x= element_text(size=18), axis.title.y = element_text(size=18)) + theme(panel.background = element_rect(fill=NA, size =1, colour ="black")) + theme(strip.background = element_rect(fill=NA, colour = "black", size = 1), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.margin = unit(0,'lines')) + scale_y_continuous(breaks = c(-3.29,0,3.29))  #+ ggtitle("Rsb and iHS at PPARGC1A Locus")
 ```
 
 ```{r,fig.height=8, fig.width=8, echo=FALSE}
-png("trellis_plot.png", width=1000, height=1000)
+png("~/Documents/PPARGC1A/Analysis/Dec2014/Gen_iHH/trellis_plot_mod4.png", width=1000, height=1000)
 p
 dev.off()
 ```
 
-![alt text](trellis_plot.png)
+![alt text](/home/murraycadzow/Documents/PPARGC1A/Analysis/Dec2014/Gen_iHH/trellis_plot_mod4.png)
 
 ```{r}
 ppargc1a=subset(rsb, POSITION > 23756664 & POSITION < 23905712)
