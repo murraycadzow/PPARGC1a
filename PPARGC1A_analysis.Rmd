@@ -62,12 +62,12 @@ round(cbind((cbind(beta=coef(tongan_lm_additive), confint(tongan_lm_additive))),
 ```
 
 ## Male
-```{r}
-cau_lm_additive=lm(BMI ~ as.factor(FULLCAUGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +RS8192678_CC1_CT2_TT3, data = CAU[CAU$SEX.x ==1, ])
-nzm_lm_additive=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = nzm[nzm$SEX.x ==1, ])
-cim_lm_additive=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = cim[cim$SEX.x ==1, ])
-samoan_lm_additive=lm(BMI ~ as.factor(FULLWPGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = samoan[samoan$SEX.x ==1,])
-tongan_lm_additive=lm(BMI ~ as.factor(FULLWPGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = tongan[tongan$SEX.x == 1,])
+```{r male add}
+cau_lm_additive=lm(BMI ~ as.factor(FULLCAUGTAFF) + AGECOL + as.factor(DIABETES) +RS8192678_CC1_CT2_TT3, data = CAU[CAU$SEX.x ==1, ])
+nzm_lm_additive=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = nzm[nzm$SEX.x ==1, ])
+cim_lm_additive=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL+ as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = cim[cim$SEX.x ==1, ])
+samoan_lm_additive=lm(BMI ~ as.factor(FULLWPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = samoan[samoan$SEX.x ==1,])
+tongan_lm_additive=lm(BMI ~ as.factor(FULLWPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = tongan[tongan$SEX.x == 1,])
 
 round(cbind((cbind(beta= coef(cau_lm_additive), confint(cau_lm_additive))),Pvalue= summary(cau_lm_additive)$coefficients[,4]),3)
 round(cbind((cbind(beta=coef(nzm_lm_additive), confint(nzm_lm_additive))), Pvalue=summary(nzm_lm_additive)$coefficients[,4]), 3)
@@ -77,12 +77,12 @@ round(cbind((cbind(beta=coef(tongan_lm_additive), confint(tongan_lm_additive))),
 ```
 
 ## Female
-```{r}
-cau_lm_additive=lm(BMI ~ as.factor(FULLCAUGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +RS8192678_CC1_CT2_TT3, data = CAU[CAU$SEX.x ==2, ])
-nzm_lm_additive=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = nzm[nzm$SEX.x ==2, ])
-cim_lm_additive=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = cim[cim$SEX.x ==2, ])
-samoan_lm_additive=lm(BMI ~ as.factor(FULLWPGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = samoan[samoan$SEX.x ==2,])
-tongan_lm_additive=lm(BMI ~ as.factor(FULLWPGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = tongan[tongan$SEX.x == 2,])
+```{r female add}
+cau_lm_additive=lm(BMI ~ as.factor(FULLCAUGTAFF) + AGECOL + as.factor(DIABETES) +RS8192678_CC1_CT2_TT3, data = CAU[CAU$SEX.x ==2, ])
+nzm_lm_additive=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = nzm[nzm$SEX.x ==2, ])
+cim_lm_additive=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = cim[cim$SEX.x ==2, ])
+samoan_lm_additive=lm(BMI ~ as.factor(FULLWPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = samoan[samoan$SEX.x ==2,])
+tongan_lm_additive=lm(BMI ~ as.factor(FULLWPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ RS8192678_CC1_CT2_TT3, data = tongan[tongan$SEX.x == 2,])
 
 round(cbind((cbind(beta= coef(cau_lm_additive), confint(cau_lm_additive))),Pvalue= summary(cau_lm_additive)$coefficients[,4]),3)
 round(cbind((cbind(beta=coef(nzm_lm_additive), confint(nzm_lm_additive))), Pvalue=summary(nzm_lm_additive)$coefficients[,4]), 3)
@@ -92,7 +92,7 @@ round(cbind((cbind(beta=coef(tongan_lm_additive), confint(tongan_lm_additive))),
 ```
 
 # Dominant CC
-```{r}
+```{r dom c}
 cau_lm_domc=lm(BMI ~ as.factor(FULLCAUGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES)  + as.factor(DOM_c), CAU)
 nzm_lm_domc=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_c), data = nzm)
 cim_lm_domc=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_c), data = cim)
@@ -107,7 +107,7 @@ round(cbind((cbind(beta=coef(tongan_lm_domc), confint(tongan_lm_domc))), Pvalue=
 ```
 
 ## Male
-```{r}
+```{r domc male}
 cau_lm_domc=lm(BMI ~ as.factor(FULLCAUGTAFF) + AGECOL + as.factor(DIABETES)  + as.factor(DOM_c), CAU[CAU$SEX.x ==1,])
 nzm_lm_domc=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_c), data = nzm[nzm$SEX.x ==1, ])
 cim_lm_domc=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_c), data = cim[cim$SEX.x ==1, ])
@@ -122,7 +122,7 @@ round(cbind((cbind(beta=coef(tongan_lm_domc), confint(tongan_lm_domc))), Pvalue=
 ```
 
 ## Female
-```{r}
+```{r domc_female}
 cau_lm_domc=lm(BMI ~ as.factor(FULLCAUGTAFF) + AGECOL + as.factor(DIABETES)  + as.factor(DOM_c), CAU[CAU$SEX.x ==2,])
 nzm_lm_domc=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_c), data = nzm[nzm$SEX.x ==2, ])
 cim_lm_domc=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_c), data = cim[cim$SEX.x ==2, ])
@@ -137,7 +137,7 @@ round(cbind((cbind(beta=coef(tongan_lm_domc), confint(tongan_lm_domc))), Pvalue=
 ```
 
 # Dominant TT
-```{r}
+```{r domt}
 cau_lm_domt=lm(BMI ~ as.factor(FULLCAUGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES)  + as.factor(DOM_t), data = CAU)
 nzm_lm_domt=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), data = nzm)
 cim_lm_domt=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), data = cim)
@@ -153,7 +153,7 @@ round(cbind((cbind(beta=coef(tongan_lm_domt), confint(tongan_lm_domt))), Pvalue=
 ```
 
 ## Male
-```{r}
+```{r domt male}
 cau_lm_domt=lm(BMI ~ as.factor(FULLCAUGTAFF) + AGECOL + as.factor(DIABETES)  + as.factor(DOM_t), data = CAU[CAU$SEX.x ==1, ])
 nzm_lm_domt=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), data = nzm[nzm$SEX.x ==1, ])
 cim_lm_domt=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), data = cim[cim$SEX.x ==1, ])
@@ -169,23 +169,29 @@ round(cbind((cbind(beta=coef(tongan_lm_domt), confint(tongan_lm_domt))), Pvalue=
 ```
 
 ## Female
-```{r}
-cau_lm_domt=lm(BMI ~ as.factor(FULLCAUGTAFF) + AGECOL + as.factor(DIABETES)  + as.factor(DOM_t), data = CAU[CAU$SEX.x ==2, ])
-nzm_lm_domt=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), data = nzm[nzm$SEX.x ==2, ])
-cim_lm_domt=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), data = cim[cim$SEX.x ==2, ])
-samoan_lm_domt=lm(BMI ~ as.factor(FULLWPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), data=samoan[samoan$SEX.x ==2, ])
-tongan_lm_domt=lm(BMI ~ as.factor(FULLWPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), data = tongan[tongan$SEX.x ==2,])
+```{r domt female }
+table(CAU[CAU$SEX.x ==2, "DIABETES"])
+table(nzm[nzm$SEX.x ==2, "DIABETES"])
+table(cim[cim$SEX.x ==2, "DIABETES"])
+table(samoan[samoan$SEX.x ==2, "DIABETES"])
+table(tongan[tongan$SEX.x ==2, "DIABETES"])
 
-round(cbind((cbind(beta= coef(cau_lm_domt), confint(cau_lm_domt))),Pvalue= summary(cau_lm_domt)$coefficients[,4]),3)
-round(cbind((cbind(beta=coef(nzm_lm_domt), confint(nzm_lm_domt))), Pvalue=summary(nzm_lm_domt)$coefficients[,4]), 3)
-round(cbind((cbind(beta=coef(cim_lm_domt), confint(cim_lm_domt))), Pvalue=summary(cim_lm_domt)$coefficients[,4]), 3)
-round(cbind((cbind(beta=coef(samoan_lm_domt), confint(samoan_lm_domt))), Pvalue=summary(samoan_lm_domt)$coefficients[,4]),3)
-round(cbind((cbind(beta=coef(tongan_lm_domt), confint(tongan_lm_domt))), Pvalue=summary(tongan_lm_domt)$coefficients[,4]),3)
+#cau_lm_domt=lm(BMI ~ as.factor(FULLCAUGTAFF) + AGECOL + as.factor(DIABETES)  + as.factor(DOM_t), data = CAU[CAU$SEX.x ==2, ])
+#nzm_lm_domt=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), data = nzm[nzm$SEX.x ==2, ])
+#cim_lm_domt=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), data = cim[cim$SEX.x ==2, ])
+#samoan_lm_domt=lm(BMI ~ as.factor(FULLWPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), data=samoan[samoan$SEX.x ==2, ])
+#tongan_lm_domt=lm(BMI ~ as.factor(FULLWPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), data = tongan[tongan$SEX.x ==2,])
+
+#round(cbind((cbind(beta= coef(cau_lm_domt), confint(cau_lm_domt))),Pvalue= summary(cau_lm_domt)$coefficients[,4]),3)
+# round(cbind((cbind(beta=coef(nzm_lm_domt), confint(nzm_lm_domt))), Pvalue=summary(nzm_lm_domt)$coefficients[,4]), 3)
+# round(cbind((cbind(beta=coef(cim_lm_domt), confint(cim_lm_domt))), Pvalue=summary(cim_lm_domt)$coefficients[,4]), 3)
+# round(cbind((cbind(beta=coef(samoan_lm_domt), confint(samoan_lm_domt))), Pvalue=summary(samoan_lm_domt)$coefficients[,4]),3)
+# round(cbind((cbind(beta=coef(tongan_lm_domt), confint(tongan_lm_domt))), Pvalue=summary(tongan_lm_domt)$coefficients[,4]),3)
 
 ```
 
 # Het Advantage
-```{r}
+```{r het}
 cau_lm_het_adv=lm(BMI ~ as.factor(FULLCAUGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES)  + as.factor(het_adv), data = CAU)
 nzm_lm_het_adv=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), data = nzm)
 cim_lm_het_adv=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(SEX.x) + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), data = cim)
@@ -200,7 +206,7 @@ round(cbind((cbind(beta=coef(tongan_lm_het_adv), confint(tongan_lm_het_adv))), P
 ```
 
 ## Male
-```{r}
+```{r het male}
 cau_lm_het_adv=lm(BMI ~ as.factor(FULLCAUGTAFF) + AGECOL + as.factor(DIABETES)  + as.factor(het_adv), data = CAU[CAU$SEX.x ==1,])
 nzm_lm_het_adv=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), data = nzm[nzm$SEX.x ==1, ])
 cim_lm_het_adv=lm(BMI ~ as.factor(FULLEPGTAFF) + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), data = cim[cim$SEX.x ==1, ])
