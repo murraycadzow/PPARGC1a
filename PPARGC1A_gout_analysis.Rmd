@@ -142,3 +142,103 @@ round(cbind(exp(cbind(OR=coef(cim_glm_domc), confint(cim_glm_domc))), Pvalue=sum
 round(cbind(exp(cbind(OR=coef(samoan_glm_domc), confint(samoan_glm_domc))), Pvalue=summary(samoan_glm_domc)$coefficients[,4]),3)
 round(cbind(exp(cbind(OR=coef(tongan_glm_domc), confint(tongan_glm_domc))), Pvalue=summary(tongan_glm_domc)$coefficients[,4]),3)
 ```
+
+# dominant TT
+```{r}
+cau_glm_domt=glm(as.factor(FULLCAUGTAFF)~ BMI + AGECOL + as.factor(CAU$DIABETES)  + as.factor(DOM_t), family="binomial", data = CAU)
+nzm_glm_domt=glm(as.factor(FULLEPGTAFF)~ BMI + AGECOL + as.factor(DIABETES) + STANCESTRY+ as.factor(DOM_t), family="binomial", data = nzm)
+cim_glm_domt=glm(as.factor(FULLEPGTAFF)~ BMI + AGECOL + as.factor(DIABETES) + STANCESTRY+ as.factor(DOM_t), family="binomial", data = cim)
+samoan_glm_domt=glm(as.factor(FULLWPGTAFF)~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), family="binomial", data = samoan)
+tongan_glm_domt=glm(as.factor(FULLWPGTAFF)~BMI + AGECOL + as.factor(DIABETES) + STANCESTRY+ as.factor(DOM_t), family="binomial", data = tongan)
+
+
+round(cbind(exp(cbind(OR=coef(cau_glm_domt), confint(cau_glm_domt))), Pvalue=summary(cau_glm_domt)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(nzm_glm_domt), confint(nzm_glm_domt))), Pvalue=summary(nzm_glm_domt)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(cim_glm_domt), confint(cim_glm_domt))), Pvalue=summary(cim_glm_domt)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(samoan_glm_domt), confint(samoan_glm_domt))), Pvalue=summary(samoan_glm_domt)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(tongan_glm_domt), confint(tongan_glm_domt))), Pvalue=summary(tongan_glm_domt)$coefficients[,4]),3)
+```
+
+## Male
+
+```{r}
+cau_glm_domt=glm(as.factor(FULLCAUGTAFF)~ BMI + AGECOL + as.factor(CAU$DIABETES)  + as.factor(DOM_t), family="binomial", data = CAU[CAU$SEX.x == 1, ])
+nzm_glm_domt=glm(as.factor(FULLEPGTAFF)~ BMI + AGECOL + as.factor(DIABETES) + STANCESTRY+ as.factor(DOM_t), family="binomial", data = nzm[nzm$SEX.x == 1, ])
+cim_glm_domt=glm(as.factor(FULLEPGTAFF)~ BMI + AGECOL + as.factor(DIABETES) + STANCESTRY+ as.factor(DOM_t), family="binomial", data = cim[cim$SEX.x == 1, ])
+samoan_glm_domt=glm(as.factor(FULLWPGTAFF)~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), family="binomial", data = samoan[samoan$SEX.x == 1, ])
+tongan_glm_domt=glm(as.factor(FULLWPGTAFF)~BMI + AGECOL + as.factor(DIABETES) + STANCESTRY+ as.factor(DOM_t), family="binomial", data = tongan[tongan$SEX.x == 1, ])
+
+
+round(cbind(exp(cbind(OR=coef(cau_glm_domt), confint(cau_glm_domt))), Pvalue=summary(cau_glm_domt)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(nzm_glm_domt), confint(nzm_glm_domt))), Pvalue=summary(nzm_glm_domt)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(cim_glm_domt), confint(cim_glm_domt))), Pvalue=summary(cim_glm_domt)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(samoan_glm_domt), confint(samoan_glm_domt))), Pvalue=summary(samoan_glm_domt)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(tongan_glm_domt), confint(tongan_glm_domt))), Pvalue=summary(tongan_glm_domt)$coefficients[,4]),3)
+```
+
+
+## Female
+```{r}
+cau_glm_domt=glm(as.factor(FULLCAUGTAFF)~ BMI + AGECOL + as.factor(CAU$DIABETES)  + as.factor(DOM_t), family="binomial", data = CAU[CAU$SEX.x == 2, ])
+nzm_glm_domt=glm(as.factor(FULLEPGTAFF)~ BMI + AGECOL + as.factor(DIABETES) + STANCESTRY+ as.factor(DOM_t), family="binomial", data = nzm[nzm$SEX.x == 2, ])
+cim_glm_domt=glm(as.factor(FULLEPGTAFF)~ BMI + AGECOL + as.factor(DIABETES) + STANCESTRY+ as.factor(DOM_t), family="binomial", data = cim[cim$SEX.x == 2, ])
+samoan_glm_domt=glm(as.factor(FULLWPGTAFF)~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(DOM_t), family="binomial", data = samoan[samoan$SEX.x == 2, ])
+tongan_glm_domt=glm(as.factor(FULLWPGTAFF)~BMI + AGECOL + as.factor(DIABETES) + STANCESTRY+ as.factor(DOM_t), family="binomial", data = tongan[tongan$SEX.x == 2, ])
+
+
+round(cbind(exp(cbind(OR=coef(cau_glm_domt), confint(cau_glm_domt))), Pvalue=summary(cau_glm_domt)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(nzm_glm_domt), confint(nzm_glm_domt))), Pvalue=summary(nzm_glm_domt)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(cim_glm_domt), confint(cim_glm_domt))), Pvalue=summary(cim_glm_domt)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(samoan_glm_domt), confint(samoan_glm_domt))), Pvalue=summary(samoan_glm_domt)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(tongan_glm_domt), confint(tongan_glm_domt))), Pvalue=summary(tongan_glm_domt)$coefficients[,4]),3)
+```
+
+
+# Het advantage
+
+```{r}
+cau_glm_het_adv=glm(as.factor(FULLCAUGTAFF)~BMI + AGECOL + as.factor(DIABETES)  + as.factor(het_adv), family="binomial", data = CAU)
+nzm_glm_het_adv=glm(as.factor(FULLEPGTAFF)~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), family="binomial", data = nzm)
+cim_glm_het_adv=glm(as.factor(FULLEPGTAFF) ~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), family="binomial", data = cim)
+samoan_glm_het_adv=glm(as.factor(FULLWPGTAFF) ~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), family="binomial", data = samoan)
+tongan_glm_het_adv=glm(as.factor(FULLWPGTAFF) ~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), family="binomial", data = tongan)
+
+
+round(cbind(exp(cbind(OR= coef(cau_glm_het_adv), confint(cau_glm_het_adv))),Pvalue= summary(cau_glm_het_adv)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(nzm_glm_het_adv), confint(nzm_glm_het_adv))), Pvalue=summary(nzm_glm_het_adv)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(cim_glm_het_adv), confint(cim_glm_het_adv))), Pvalue=summary(cim_glm_het_adv)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(samoan_glm_het_adv), confint(samoan_glm_het_adv))), Pvalue=summary(samoan_glm_het_adv)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(tongan_glm_het_adv), confint(tongan_glm_het_adv))), Pvalue=summary(tongan_glm_het_adv)$coefficients[,4]),3)
+```
+
+## Male
+```{r}
+cau_glm_het_adv=glm(as.factor(FULLCAUGTAFF)~BMI + AGECOL + as.factor(DIABETES)  + as.factor(het_adv), family="binomial", data = CAU[CAU$SEX.x ==1,])
+nzm_glm_het_adv=glm(as.factor(FULLEPGTAFF)~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), family="binomial", data = nzm[nzm$SEX.x ==1, ])
+cim_glm_het_adv=glm(as.factor(FULLEPGTAFF) ~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), family="binomial", data = cim[cim$SEX.x ==1,])
+samoan_glm_het_adv=glm(as.factor(FULLWPGTAFF) ~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), family="binomial", data = samoan[samoan$SEX.x ==1,])
+tongan_glm_het_adv=glm(as.factor(FULLWPGTAFF) ~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), family="binomial", data = tongan[tongan$SEX.x ==1,])
+
+
+round(cbind(exp(cbind(OR= coef(cau_glm_het_adv), confint(cau_glm_het_adv))),Pvalue= summary(cau_glm_het_adv)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(nzm_glm_het_adv), confint(nzm_glm_het_adv))), Pvalue=summary(nzm_glm_het_adv)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(cim_glm_het_adv), confint(cim_glm_het_adv))), Pvalue=summary(cim_glm_het_adv)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(samoan_glm_het_adv), confint(samoan_glm_het_adv))), Pvalue=summary(samoan_glm_het_adv)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(tongan_glm_het_adv), confint(tongan_glm_het_adv))), Pvalue=summary(tongan_glm_het_adv)$coefficients[,4]),3)
+```
+
+## Female
+```{r}
+cau_glm_het_adv=glm(as.factor(FULLCAUGTAFF)~BMI + AGECOL + as.factor(DIABETES)  + as.factor(het_adv), family="binomial", data = CAU[CAU$SEX.x ==2,])
+nzm_glm_het_adv=glm(as.factor(FULLEPGTAFF)~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), family="binomial", data = nzm[nzm$SEX.x ==2, ])
+cim_glm_het_adv=glm(as.factor(FULLEPGTAFF) ~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), family="binomial", data = cim[cim$SEX.x ==2,])
+samoan_glm_het_adv=glm(as.factor(FULLWPGTAFF) ~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), family="binomial", data = samoan[samoan$SEX.x ==2,])
+tongan_glm_het_adv=glm(as.factor(FULLWPGTAFF) ~BMI + AGECOL + as.factor(DIABETES) +STANCESTRY+ as.factor(het_adv), family="binomial", data = tongan[tongan$SEX.x ==2,])
+
+
+round(cbind(exp(cbind(OR= coef(cau_glm_het_adv), confint(cau_glm_het_adv))),Pvalue= summary(cau_glm_het_adv)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(nzm_glm_het_adv), confint(nzm_glm_het_adv))), Pvalue=summary(nzm_glm_het_adv)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(cim_glm_het_adv), confint(cim_glm_het_adv))), Pvalue=summary(cim_glm_het_adv)$coefficients[,4]), 3)
+round(cbind(exp(cbind(OR=coef(samoan_glm_het_adv), confint(samoan_glm_het_adv))), Pvalue=summary(samoan_glm_het_adv)$coefficients[,4]),3)
+round(cbind(exp(cbind(OR=coef(tongan_glm_het_adv), confint(tongan_glm_het_adv))), Pvalue=summary(tongan_glm_het_adv)$coefficients[,4]),3)
+```
