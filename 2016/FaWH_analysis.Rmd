@@ -1,0 +1,172 @@
+---
+title: "PPARGC1A Fay and Wu's H"
+author: "Murray Cadzow"
+date: "`r format(Sys.Date())`"
+output: html_document
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+library(ggplot2)
+library(data.table)
+library(dplyr)
+
+
+
+
+data_dir <- "/media/xsan/scratch/merrimanlab/murray/working_dir/PPARGC1A_info0.8/"
+repo_dir <- '~/Git_repos/PPARGC1a/2016/'
+
+southam_diabetes <- read.csv(paste0(repo_dir,"southam_diabetes.csv"), stringsAsFactors = FALSE)
+southam_obesity <- read.csv(paste0(repo_dir,"southam_obesity.csv"), stringsAsFactors = FALSE)
+
+chrs <- sort(union(c(4,southam_obesity$chrom), southam_diabetes$chrom))
+snps <- sort(c('rs8192678', southam_obesity$snp, southam_diabetes$snp))
+snps <- snps[!duplicated(snps)]
+
+
+
+get_faw = function(faw, pop,chr){
+  a= read.table(faw, header=TRUE, skip=5)
+  names(a)=c("RefStart","Refend","RefMid","chrom_start","chrom_end","Midpoint","NumSites","Missing","S","Eta","Eta_E","Pi","FuLi_D","FuLi_F","FayWu_H")
+  b=a[a$FayWu_H != "NaN",]
+  b$POP=pop
+  b$chrom <- chr
+  return(b[,c("chrom","chrom_start","chrom_end", "FayWu_H","POP")])
+}
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(biomaRt)
+## biomart
+snpmart = useMart(  host="grch37.ensembl.org", biomart='ENSEMBL_MART_SNP', dataset="hsapiens_snp")
+
+snp=list()
+
+for( s in snps){
+  snp[[s]]=getBM(attributes=(c("refsnp_id","chr_name","chrom_start", 'chrom_end',"ensembl_gene_stable_id")), filters=c("snp_filter") , values=as.list(s) , mart=snpmart, verbose=TRUE)
+}
+
+snp <- rbindlist(snp)
+snp <- snp[snp$chr_name %in% 1:22,]
+snp$chr_name <- as.numeric(snp$chr_name)
+snp$chrom_start <- as.numeric(snp$chrom_start)
+snp$chrom_end <- as.numeric(snp$chrom_end)
+
+snp$centre_start <- snp$chrom_start - 2e6
+snp$centre_end <- snp$chrom_end + 2e6
+snp$centre_start[snp$centre_start < 0] <- 0 
+
+```
+
+# 30kb
+
+```{r 30kb, echo = FALSE}
+pops <- c("axiom_info0.8", "omni_info0.8", "CEU","CHB","CHS","GBR","YRI")
+poplist <- list()
+p  <- list()
+
+for(pop in pops){
+  forPlotting  <- list()
+  for(chr in chrs){
+    p[[chr]] <- get_faw(paste0(data_dir,"/30kb/FAWH/results/",pop,chr,".faw"), pop, chr)
+    for(rs in unique(snp[snp$chr_name == chr,]$refsnp_id)){
+      forPlotting[[rs]] <- as.data.frame(p[[chr]]  %>% filter( (snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_start >= chrom_start & snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_start <= chrom_end) | (snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_start >= chrom_start & snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_end <= chrom_end) | (snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_start <= chrom_start & snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_end >= chrom_end)
+      ))
+      forPlotting[[rs]]$rs <- rs
+      plot(ggplot(forPlotting[[rs]], aes(x = chrom_start, y = FayWu_H)) + geom_point() + ggtitle(rs) +
+             geom_hline(yintercept = mean(p[[chr]]$FayWu_H ,na.rm=TRUE), aes(colour = "blue")) +
+             geom_hline(yintercept = quantile(p[[chr]]$FayWu_H, 0.025, na.rm=TRUE), aes(colour = "red")) +
+             geom_hline(yintercept = quantile(p[[chr]]$FayWu_H, 0.975 , na.rm=TRUE), aes(colour = "blue")) +
+             geom_vline(xintercept = snp[snp$refsnp_id == rs,]$chrom_start)
+      )
+    }
+  }
+  poplist[[pop]] <- rbindlist(p)
+  forPlotting2 <- rbindlist(forPlotting)
+  print(pop)
+  print(as.data.frame(poplist[[pop]]  %>% group_by(chrom)  %>% summarise(min = min(FayWu_H, na.rm=TRUE),lq2.5 = quantile(FayWu_H,0.025, na.rm=TRUE),mean = mean(FayWu_H, na.rm=TRUE), uq97.5 = quantile(FayWu_H, 0.975, na.rm=TRUE), max = max(FayWu_H, na.rm=TRUE))))
+  
+  plot(ggplot(forPlotting2, aes(x=chrom_start, y=FayWu_H)) + geom_point() + facet_wrap(~rs, scales= 'free_x') )
+  
+}
+
+```
+
+\pagebreak
+
+# 5kb
+
+```{r 5kb, echo = FALSE}
+pops <- c("axiom_info0.8", "omni_info0.8", "CEU","CHB","CHS","GBR","YRI")
+poplist <- list()
+p  <- list()
+
+for(pop in pops){
+  forPlotting  <- list()
+  for(chr in chrs){
+    p[[chr]] <- get_faw(paste0(data_dir,"/5kb/FAWH/results/",pop,chr,".faw"), pop, chr)
+    for(rs in unique(snp[snp$chr_name == chr,]$refsnp_id)){
+      forPlotting[[rs]] <- as.data.frame(p[[chr]]  %>% filter( (snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_start >= chrom_start & snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_start <= chrom_end) | (snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_start >= chrom_start & snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_end <= chrom_end) | (snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_start <= chrom_start & snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_end >= chrom_end)
+      ))
+      forPlotting[[rs]]$rs <- rs
+      forPlotting[[rs]]$rs <- rs
+      plot(ggplot(forPlotting[[rs]], aes(x = chrom_start, y = FayWu_H)) + geom_point() + ggtitle(rs) +
+             geom_hline(yintercept = mean(p[[chr]]$FayWu_H ,na.rm=TRUE), aes(colour = "blue")) +
+             geom_hline(yintercept = quantile(p[[chr]]$FayWu_H, 0.025, na.rm=TRUE), aes(colour = "red")) +
+             geom_hline(yintercept = quantile(p[[chr]]$FayWu_H, 0.975 , na.rm=TRUE), aes(colour = "blue")) +
+             geom_vline(xintercept = snp[snp$refsnp_id == rs,]$chrom_start)
+      )
+    }
+  }
+  poplist[[pop]] <- rbindlist(p)
+  forPlotting2 <- rbindlist(forPlotting)
+  print(pop)
+  print(as.data.frame(poplist[[pop]]  %>% group_by(chrom)  %>% summarise(min = min(FayWu_H, na.rm=TRUE),lq2.5 = quantile(FayWu_H,0.025, na.rm=TRUE),mean = mean(FayWu_H, na.rm=TRUE), uq97.5 = quantile(FayWu_H, 0.975, na.rm=TRUE), max = max(FayWu_H, na.rm=TRUE))))
+  
+  plot(ggplot(forPlotting2, aes(x=chrom_start, y=FayWu_H)) + geom_point() + facet_wrap(~rs, scales= 'free_x') )
+  
+}
+
+```
+
+\pagebreak
+
+# 1kb
+
+```{r 1kb, echo = FALSE}
+pops <- c("axiom_info0.8", "omni_info0.8", "CEU","CHB","CHS","GBR","YRI")
+poplist <- list()
+p  <- list()
+
+for(pop in pops){
+  forPlotting  <- list()
+  for(chr in chrs){
+    p[[chr]] <- get_faw(paste0(data_dir,"/1kb/FAWH/results/",pop,chr,".faw"), pop, chr)
+    for(rs in unique(snp[snp$chr_name == chr,]$refsnp_id)){
+      forPlotting[[rs]] <- as.data.frame(p[[chr]]  %>% filter( (snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_start >= chrom_start & snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_start <= chrom_end) | (snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_start >= chrom_start & snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_end <= chrom_end) | (snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_start <= chrom_start & snp[snp$chr_name == chr & snp$refsnp_id == rs,]$centre_end >= chrom_end)
+      ))
+      forPlotting[[rs]]$rs <- rs
+      forPlotting[[rs]]$rs <- rs
+      plot(ggplot(forPlotting[[rs]], aes(x = chrom_start, y = FayWu_H)) + geom_point() + ggtitle(rs) +
+             geom_hline(yintercept = mean(p[[chr]]$FayWu_H ,na.rm=TRUE), aes(colour = "blue")) +
+             geom_hline(yintercept = quantile(p[[chr]]$FayWu_H, 0.025, na.rm=TRUE), aes(colour = "red")) +
+             geom_hline(yintercept = quantile(p[[chr]]$FayWu_H, 0.975 , na.rm=TRUE), aes(colour = "blue")) +
+             geom_vline(xintercept = snp[snp$refsnp_id == rs,]$chrom_start)
+      )
+    }
+  }
+  poplist[[pop]] <- rbindlist(p)
+  forPlotting2 <- rbindlist(forPlotting)
+  print(pop)
+  print(as.data.frame(poplist[[pop]]  %>% group_by(chrom)  %>% summarise(min = min(FayWu_H, na.rm=TRUE),lq2.5 = quantile(FayWu_H,0.025, na.rm=TRUE),mean = mean(FayWu_H, na.rm=TRUE), uq97.5 = quantile(FayWu_H, 0.975, na.rm=TRUE), max = max(FayWu_H, na.rm=TRUE))))
+  
+  plot(ggplot(forPlotting2, aes(x=chrom_start, y=FayWu_H)) + geom_point() + facet_wrap(~rs, scales= 'free_x') )
+  
+}
+
+```
+
+
+
+

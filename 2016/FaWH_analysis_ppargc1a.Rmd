@@ -1,0 +1,195 @@
+---
+title: "PPARGC1A Fay and Wu's H"
+author: "Murray Cadzow"
+date: '`r format(Sys.Date())`'
+output: pdf_document
+---
+
+
+
+# PPARGC1A
+
+```{r setup, echo=FALSE, message=FALSE}
+library(ggplot2)
+library(data.table)
+library(dplyr)
+print(getwd())
+
+
+
+data_dir <- "/media/xsan/scratch/merrimanlab/murray/working_dir/PPARGC1A_info0.8/"
+repo_dir <- '~/Git_repos/PPARGC1a/2016/'
+
+southam_diabetes <- read.csv(paste0(repo_dir,"southam_diabetes.csv"), stringsAsFactors = FALSE)
+southam_obesity <- read.csv(paste0(repo_dir,"southam_obesity.csv"), stringsAsFactors = FALSE)
+
+chrs <- sort(union(c(4,southam_obesity$chrom), southam_diabetes$chrom))
+snps <- sort(c('rs8192678', southam_obesity$snp, southam_diabetes$snp))
+snps <- snps[!duplicated(snps)]
+
+
+
+get_faw = function(faw, pop,chr){
+  a= read.table(faw, header=TRUE, skip=5)
+  names(a)=c("RefStart","Refend","RefMid","chrom_start","chrom_end","Midpoint","NumSites","Missing","S","Eta","Eta_E","Pi","FuLi_D","FuLi_F","FayWu_H")
+  b=a[a$FayWu_H != "NaN",]
+  b$POP=pop
+  b$chrom <- chr
+  return(b[,c("chrom","chrom_start","chrom_end", "FayWu_H","POP")])
+}
+```
+
+# 30kb
+
+```{r 30kb_data, echo=FALSE}
+library(scales)
+library(pander)
+library(xtable)
+CEU_faw=get_faw(faw=paste0(data_dir,"30kb/FAWH/results/CEU4.faw"),pop="CEU",chr=4)
+CHB_faw=get_faw(faw=paste0(data_dir,"30kb/FAWH/results/CHB4.faw"),pop="CHB",chr=4)
+CHS_faw=get_faw(faw=paste0(data_dir,"30kb/FAWH/results/CHS4.faw"),pop="CHS",chr=4)
+GBR_faw=get_faw(faw=paste0(data_dir,"30kb/FAWH/results/GBR4.faw"),pop="GBR",chr=4)
+YRI_faw=get_faw(faw=paste0(data_dir,"30kb/FAWH/results/YRI4.faw"),pop="YRI",chr=4)
+AXIOM_faw=get_faw(faw=paste0(data_dir,"30kb/FAWH/results/axiom_info0.84.faw"), pop="Maori",chr=4)
+OMNI_faw=get_faw(faw=paste0(data_dir,"30kb/FAWH/results/omni_info0.84.faw"), pop="Samoan",chr=4)
+thirtykb_faw=rbind(CEU_faw,CHB_faw,CHS_faw,GBR_faw,YRI_faw,AXIOM_faw,OMNI_faw)
+rm(CEU_faw,CHB_faw,CHS_faw,GBR_faw,YRI_faw,AXIOM_faw,OMNI_faw)
+```
+
+Fay and Wu's H for rs8192678 and summary of Chromosome 4
+
+```{r 30kb_table, echo=FALSE,results='asis'}
+library(plyr)
+s = ddply(thirtykb_faw, .(POP), summarise,q1=quantile(FayWu_H,0.025), q2=quantile(FayWu_H,0.975), m= mean(FayWu_H))
+tab=s
+names(tab)=c("POP", "Lower Quantile","Upper Quantile","Mean")
+window = 1000
+rs8192678=thirtykb_faw[thirtykb_faw$chrom_start < 23815662 & (thirtykb_faw$chrom_end) > 23815662,c("POP","chrom_start","FayWu_H")]
+tab=merge(tab,rs8192678, by="POP")
+tab[,c("FayWu_H","Lower Quantile","Mean","Upper Quantile")]=format(round(tab[,c("FayWu_H","Lower Quantile","Mean","Upper Quantile")], digits=3), nsmall = 3)
+xtable(data.frame(tab[c(1,2,3,4,7,5,6),c("POP","FayWu_H","Lower Quantile","Mean","Upper Quantile")], row.names=NULL))
+```
+
+
+
+```{r 30kb_plot_setup, echo=FALSE}
+thirtykb_ss = subset(thirtykb_faw, chrom_start > 22.7e6 & chrom_end < 24.9e6)
+ppargc1a = subset(thirtykb_faw, chrom_start > 23756664 & chrom_end < 23905712)
+p = ggplot(data = thirtykb_ss, aes(x=chrom_start, y=FayWu_H), ylim=c(min(thirtykb_ss$FayWu_H -0.5), max(thirtykb_ss$FayWu_H + 0.5)))  + geom_point(shape = 16, colour= alpha("black", 1/5)) + facet_wrap(~POP, scales = "free_x") + geom_point(data=ppargc1a, aes(y = FayWu_H, x=chrom_start,colour="PPARGC1A")) + geom_hline(aes(yintercept= q1, colour ="quantile"), data=s)  + geom_hline(aes(yintercept= q2, colour ="quantile"), data=s)  +geom_hline(aes(yintercept= m, colour="mean"), data=s) + scale_colour_manual("",breaks=c("mean","quantile","PPARGC1A"),values=c("blue","red","purple")) + scale_x_continuous(breaks=c(23e6,23.5e6,24e6,24.5e6), labels=c("23","23.5", "24", "24.5")) + xlab("Chromosome 4 Position (Mbp)") + ylab("Fay and Wu's H") + ggtitle("Fay and Wu's H at PPARGC1A Locus (30kb)") + theme( plot.background= element_rect(colour="black",fill=NA), legend.position= c(0.75, 0.12)) + geom_vline(xintercept = 23815662, color="red", linetype="longdash")
+
+png("faw_30kb.png")
+p
+dev.off()
+
+ppargc1a[ppargc1a$POP == "CEU" & (ppargc1a$FayWu_H > s[s$POP=="CEU","q2"] | ppargc1a$FayWu_H < s[s$POP=="CEU","q1"]),]
+ppargc1a[ppargc1a$POP == "CHB" & (ppargc1a$FayWu_H > s[s$POP=="CHB","q2"] | ppargc1a$FayWu_H < s[s$POP=="CHB","q1"]),]
+ppargc1a[ppargc1a$POP == "CHS" & (ppargc1a$FayWu_H > s[s$POP=="CHS","q2"] | ppargc1a$FayWu_H < s[s$POP=="CHS","q1"]),]
+ppargc1a[ppargc1a$POP == "GBR" & (ppargc1a$FayWu_H > s[s$POP=="GBR","q2"] | ppargc1a$FayWu_H < s[s$POP=="GBR","q1"]),]
+ppargc1a[ppargc1a$POP == "YRI" & (ppargc1a$FayWu_H > s[s$POP=="YRI","q2"] | ppargc1a$FayWu_H < s[s$POP=="YRI","q1"]),]
+ppargc1a[ppargc1a$POP == "Maori" & (ppargc1a$FayWu_H > s[s$POP=="Maori","q2"] | ppargc1a$FayWu_H < s[s$POP=="Maori","q1"]),]
+ppargc1a[ppargc1a$POP == "Samoan" & (ppargc1a$FayWu_H > s[s$POP=="Samoan","q2"] | ppargc1a$FayWu_H < s[s$POP=="Samoan","q1"]),]
+
+```
+
+\pagebreak
+
+# 5kb
+```{r 5kb_data, echo=FALSE}
+
+CEU_faw=get_faw(faw=paste0(data_dir,"5kb/FAWH/results/CEU4.faw"),pop="CEU",chr=4)
+CHB_faw=get_faw(faw=paste0(data_dir,"5kb/FAWH/results/CHB4.faw"),pop="CHB",chr=4)
+CHS_faw=get_faw(faw=paste0(data_dir,"5kb/FAWH/results/CHS4.faw"),pop="CHS",chr=4)
+GBR_faw=get_faw(faw=paste0(data_dir,"5kb/FAWH/results/GBR4.faw"),pop="GBR",chr=4)
+YRI_faw=get_faw(faw=paste0(data_dir,"5kb/FAWH/results/YRI4.faw"),pop="YRI",chr=4)
+AXIOM_faw=get_faw(faw=paste0(data_dir,"5kb/FAWH/results/axiom_info0.84.faw"), pop="Maori",chr=4)
+OMNI_faw=get_faw(faw=paste0(data_dir,"5kb/FAWH/results/omni_info0.84.faw"), pop="Samoan",chr=4)
+fivekb_faw=rbind(CEU_faw,CHB_faw,CHS_faw,GBR_faw,YRI_faw,AXIOM_faw,OMNI_faw)
+rm(CEU_faw,CHB_faw,CHS_faw,GBR_faw,YRI_faw,AXIOM_faw,OMNI_faw)
+```
+
+
+Fay and Wu's H for rs8192678 and summary of Chromosome 4
+
+```{r 5kb_table, echo=FALSE,results='asis'}
+library(plyr)
+s = ddply(fivekb_faw, .(POP), summarise,q1=quantile(FayWu_H,0.025), q2=quantile(FayWu_H,0.975), m= mean(FayWu_H))
+tab=s
+names(tab)=c("POP", "Lower Quantile","Upper Quantile","Mean")
+window = 1000
+rs8192678=fivekb_faw[fivekb_faw$chrom_start < 23815662 & (fivekb_faw$chrom_end) > 23815662,c("POP","chrom_start","FayWu_H")]
+tab=merge(tab,rs8192678, by="POP")
+tab[,c("FayWu_H","Lower Quantile","Mean","Upper Quantile")]=format(round(tab[,c("FayWu_H","Lower Quantile","Mean","Upper Quantile")], digits=3), nsmall = 3)
+xtable(data.frame(tab[c(1,2,3,4,7,5,6),c("POP","FayWu_H","Lower Quantile","Mean","Upper Quantile")], row.names=NULL))
+```
+
+
+
+```{r 5kb_plot_setup, echo=FALSE}
+fivekb_ss = subset(fivekb_faw, chrom_start > 22.7e6 & chrom_end < 24.9e6)
+ppargc1a = subset(fivekb_faw, chrom_start > 23756664 & chrom_end < 23905712)
+p = ggplot(data = fivekb_ss, aes(x=chrom_start, y=FayWu_H), ylim=c(min(fivekb_ss$FayWu_H -0.5), max(fivekb_ss$FayWu_H + 0.5)))  + geom_point(shape = 16, colour= alpha("black", 1/5)) + facet_wrap(~POP, scales = "free_x") + geom_point(data=ppargc1a, aes(y = FayWu_H, x=chrom_start,colour="PPARGC1A")) + geom_hline(aes(yintercept= q1, colour ="quantile"), data=s)  + geom_hline(aes(yintercept= q2, colour ="quantile"), data=s)  +geom_hline(aes(yintercept= m, colour="mean"), data=s) + scale_colour_manual("",breaks=c("mean","quantile","PPARGC1A"),values=c("blue","red","purple")) + scale_x_continuous(breaks=c(23e6,23.5e6,24e6,24.5e6), labels=c("23","23.5", "24", "24.5")) + xlab("Chromosome 4 Position (Mbp)") + ylab("Fay and Wu's H") + ggtitle("Fay and Wu's H at PPARGC1A Locus (5kb)") + theme( plot.background= element_rect(colour="black",fill=NA), legend.position= c(0.75, 0.12)) + geom_vline(xintercept = 23815662, color="red", linetype="longdash")
+
+png("faw_5kb.png")
+p
+dev.off()
+
+ppargc1a[ppargc1a$POP == "CEU" & (ppargc1a$FayWu_H > s[s$POP=="CEU","q2"] | ppargc1a$FayWu_H < s[s$POP=="CEU","q1"]),]
+ppargc1a[ppargc1a$POP == "CHB" & (ppargc1a$FayWu_H > s[s$POP=="CHB","q2"] | ppargc1a$FayWu_H < s[s$POP=="CHB","q1"]),]
+ppargc1a[ppargc1a$POP == "CHS" & (ppargc1a$FayWu_H > s[s$POP=="CHS","q2"] | ppargc1a$FayWu_H < s[s$POP=="CHS","q1"]),]
+ppargc1a[ppargc1a$POP == "GBR" & (ppargc1a$FayWu_H > s[s$POP=="GBR","q2"] | ppargc1a$FayWu_H < s[s$POP=="GBR","q1"]),]
+ppargc1a[ppargc1a$POP == "YRI" & (ppargc1a$FayWu_H > s[s$POP=="YRI","q2"] | ppargc1a$FayWu_H < s[s$POP=="YRI","q1"]),]
+ppargc1a[ppargc1a$POP == "Maori" & (ppargc1a$FayWu_H > s[s$POP=="Maori","q2"] | ppargc1a$FayWu_H < s[s$POP=="Maori","q1"]),]
+ppargc1a[ppargc1a$POP == "Samoan" & (ppargc1a$FayWu_H > s[s$POP=="Samoan","q2"] | ppargc1a$FayWu_H < s[s$POP=="Samoan","q1"]),]
+
+```
+
+\pagebreak
+
+# 1KB
+
+```{r onekb_data, echo=FALSE}
+CEU_faw=get_faw(faw=paste0(data_dir,"1kb/FAWH/results/CEU4.faw"),pop="CEU",chr=4)
+CHB_faw=get_faw(faw=paste0(data_dir,"1kb/FAWH/results/CHB4.faw"),pop="CHB",chr=4)
+CHS_faw=get_faw(faw=paste0(data_dir,"1kb/FAWH/results/CHS4.faw"),pop="CHS",chr=4)
+GBR_faw=get_faw(faw=paste0(data_dir,"1kb/FAWH/results/GBR4.faw"),pop="GBR",chr=4)
+YRI_faw=get_faw(faw=paste0(data_dir,"1kb/FAWH/results/YRI4.faw"),pop="YRI",chr=4)
+AXIOM_faw=get_faw(faw=paste0(data_dir,"1kb/FAWH/results/axiom_info0.84.faw"), pop="Maori",chr=4)
+OMNI_faw=get_faw(faw=paste0(data_dir,"1kb/FAWH/results/omni_info0.84.faw"), pop="Samoan",chr=4)
+onekb_faw=rbind(CEU_faw,CHB_faw,CHS_faw,GBR_faw,YRI_faw,AXIOM_faw,OMNI_faw)
+rm(CEU_faw,CHB_faw,CHS_faw,GBR_faw,YRI_faw,AXIOM_faw,OMNI_faw)
+```
+
+Fay and Wu's H for rs8192678 and summary of Chromosome 4
+
+```{r 1kb_table, echo=FALSE,results='asis'}
+library(plyr)
+s = ddply(onekb_faw, .(POP), summarise,q1=quantile(FayWu_H,0.025), q2=quantile(FayWu_H,0.975), m= mean(FayWu_H))
+tab=s
+names(tab)=c("POP", "Lower Quantile","Upper Quantile","Mean")
+window = 1000
+rs8192678=onekb_faw[onekb_faw$chrom_start < 23815662 & (onekb_faw$chrom_end) > 23815662,c("POP","chrom_start","FayWu_H")]
+tab=merge(tab,rs8192678, by="POP")
+tab[,c("FayWu_H","Lower Quantile","Mean","Upper Quantile")]=format(round(tab[,c("FayWu_H","Lower Quantile","Mean","Upper Quantile")], digits=3), nsmall = 3)
+xtable(data.frame(tab[c(1,2,3,4,7,5,6),c("POP","FayWu_H","Lower Quantile","Mean","Upper Quantile")], row.names=NULL))
+```
+
+
+
+```{r 1kb_plot_setup, echo=FALSE}
+onekb_ss = subset(onekb_faw, chrom_start > 22.7e6 & chrom_end < 24.9e6)
+ppargc1a = subset(onekb_faw, chrom_start > 23756664 & chrom_end < 23905712)
+p = ggplot(data = onekb_ss, aes(x=chrom_start, y=FayWu_H), ylim=c(min(onekb_ss$FayWu_H -0.5), max(onekb_ss$FayWu_H + 0.5)))  + geom_point(shape = 16, colour= alpha("black", 1/5)) + facet_wrap(~POP, scales = "free_x") + geom_point(data=ppargc1a, aes(y = FayWu_H, x=chrom_start,colour="PPARGC1A")) + geom_hline(aes(yintercept= q1, colour ="quantile"), data=s)  + geom_hline(aes(yintercept= q2, colour ="quantile"), data=s)  +geom_hline(aes(yintercept= m, colour="mean"), data=s) + scale_colour_manual("",breaks=c("mean","quantile","PPARGC1A"),values=c("blue","red","purple")) + scale_x_continuous(breaks=c(23e6,23.5e6,24e6,24.5e6), labels=c("23","23.5", "24", "24.5")) + xlab("Chromosome 4 Position (Mbp)") + ylab("Fay and Wu's H") + ggtitle("Fay and Wu's H at PPARGC1A Locus (1kb)") + theme( plot.background= element_rect(colour="black",fill=NA), legend.position= c(0.75, 0.12)) + geom_vline(xintercept = 23815662, color="red", linetype="longdash")
+
+png("faw_1kb.png")
+p
+dev.off()
+
+ppargc1a[ppargc1a$POP == "CEU" & (ppargc1a$FayWu_H > s[s$POP=="CEU","q2"] | ppargc1a$FayWu_H < s[s$POP=="CEU","q1"]),]
+ppargc1a[ppargc1a$POP == "CHB" & (ppargc1a$FayWu_H > s[s$POP=="CHB","q2"] | ppargc1a$FayWu_H < s[s$POP=="CHB","q1"]),]
+ppargc1a[ppargc1a$POP == "CHS" & (ppargc1a$FayWu_H > s[s$POP=="CHS","q2"] | ppargc1a$FayWu_H < s[s$POP=="CHS","q1"]),]
+ppargc1a[ppargc1a$POP == "GBR" & (ppargc1a$FayWu_H > s[s$POP=="GBR","q2"] | ppargc1a$FayWu_H < s[s$POP=="GBR","q1"]),]
+ppargc1a[ppargc1a$POP == "YRI" & (ppargc1a$FayWu_H > s[s$POP=="YRI","q2"] | ppargc1a$FayWu_H < s[s$POP=="YRI","q1"]),]
+ppargc1a[ppargc1a$POP == "Maori" & (ppargc1a$FayWu_H > s[s$POP=="Maori","q2"] | ppargc1a$FayWu_H < s[s$POP=="Maori","q1"]),]
+ppargc1a[ppargc1a$POP == "Samoan" & (ppargc1a$FayWu_H > s[s$POP=="Samoan","q2"] | ppargc1a$FayWu_H < s[s$POP=="Samoan","q1"]),]
+
+```
